@@ -75,8 +75,14 @@ public:
     logger &operator=(logger other) SPDLOG_NOEXCEPT;
     void swap(spdlog::logger &other) SPDLOG_NOEXCEPT;
 
-    template <typename... Args>
-    void log(source_loc loc, level::level_enum lvl, format_string_t<Args...> fmt, Args &&...args) {
+    void log(level::level_enum lvl, const T &msg, details::attr attr)
+    {
+        log(source_loc{}, lvl, msg, attr);
+    }
+
+    template<typename... Args>
+    void log(source_loc loc, level::level_enum lvl, format_string_t<Args...> fmt, Args &&... args)
+    {
         log_(loc, lvl, details::to_string_view(fmt), std::forward<Args>(args)...);
     }
 
@@ -112,7 +118,21 @@ public:
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
-    void log(source_loc loc, level::level_enum lvl, string_view_t msg) {
+    void log(source_loc loc, level::level_enum lvl, string_view_t msg, details::attr attr)
+    {
+        bool log_enabled = should_log(lvl);
+        bool traceback_enabled = tracer_.enabled();
+        if (!log_enabled && !traceback_enabled)
+        {
+            return;
+        }
+
+        details::log_msg log_msg(loc, name_, lvl, msg);
+        log_msg.attributes.push_back(std::move(attr));
+        log_it_(log_msg, log_enabled, traceback_enabled);
+    }
+    void log(source_loc loc, level::level_enum lvl, string_view_t msg)
+    {
         bool log_enabled = should_log(lvl);
         bool traceback_enabled = tracer_.enabled();
         if (!log_enabled && !traceback_enabled) {
