@@ -384,9 +384,11 @@ void replace_default_logger_example()
 
 void attribute_example() {
     // auto custom_logger = spdlog::stdout_color_mt("custom_logger", spdlog::attribute_list{{"fixed_key", "fixed_val"}});
-    auto custom_logger = spdlog::stdout_color_mt("custom_logger", true);
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    auto custom_logger = spdlog::logger{"custom_logger", console_sink, {{"fixed_key", "fixed_val"}}};
     // auto custom_logger = spdlog::stdout_color_mt("custom_logger");
-    custom_logger->warn("EXPERIMENTAL: log with attributes", {{"attribute_key", "attribute value"}});
+
+    custom_logger.warn("EXPERIMENTAL: log with attributes", {{"attribute_key", "attribute value"}});
 
     // logfmt structured logging using attributes
 

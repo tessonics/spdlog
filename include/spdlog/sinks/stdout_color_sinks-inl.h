@@ -12,14 +12,6 @@
 
 namespace spdlog {
 
-// function overload test: fixed attributes
-template<typename Factory>
-SPDLOG_INLINE std::shared_ptr<logger> stdout_color_mt(const std::string &logger_name, bool test, color_mode mode)
-{
-    // return Factory::create(logger_name, test, mode);
-    return Factory::template create<sinks::stdout_color_sink_mt>(logger_name, mode);
-}
-
 template<typename Factory>
 SPDLOG_INLINE std::shared_ptr<logger> stdout_color_mt(const std::string &logger_name, color_mode mode)
 {
