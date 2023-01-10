@@ -150,6 +150,7 @@ public:
         }
 
         details::log_msg log_msg(log_time, loc, name_, lvl, msg);
+        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -178,6 +179,7 @@ public:
         }
 
         details::log_msg log_msg(loc, name_, lvl, msg);
+        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
