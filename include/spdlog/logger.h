@@ -164,7 +164,6 @@ public:
         }
 
         details::log_msg log_msg(loc, name_, lvl, msg);
-        // log_msg.attributes.push_back(attrs);
         log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
         log_msg.attributes.insert(log_msg.attributes.end(), attrs.begin(), attrs.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
@@ -249,6 +248,7 @@ public:
         memory_buf_t buf;
         details::os::wstr_to_utf8buf(wstring_view_t(msg.data(), msg.size()), buf);
         details::log_msg log_msg(log_time, loc, name_, lvl, string_view_t(buf.data(), buf.size()));
+        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -264,6 +264,7 @@ public:
         memory_buf_t buf;
         details::os::wstr_to_utf8buf(wstring_view_t(msg.data(), msg.size()), buf);
         details::log_msg log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()));
+        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -463,6 +464,7 @@ protected:
 #endif
 
             details::log_msg log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()));
+            log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
             log_it_(log_msg, log_enabled, traceback_enabled);
         }
         SPDLOG_LOGGER_CATCH(loc)
@@ -488,6 +490,7 @@ protected:
             memory_buf_t buf;
             details::os::wstr_to_utf8buf(wstring_view_t(wbuf.data(), wbuf.size()), buf);
             details::log_msg log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()));
+            log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
             log_it_(log_msg, log_enabled, traceback_enabled);
         }
         SPDLOG_LOGGER_CATCH(loc)
