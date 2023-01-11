@@ -788,7 +788,7 @@ class attr_formatter_start final : public flag_formatter
 {
 public:
     explicit attr_formatter_start(padding_info padinfo)
-        : flag_formatter(padinfo)
+        : flag_formatter(padinfo, details::attr_flags::start)
     {}
     void format(const details::log_msg &, const std::tm &, memory_buf_t &dest) override
     {
@@ -799,7 +799,7 @@ class attr_formatter_stop final : public flag_formatter
 {
 public:
     explicit attr_formatter_stop(padding_info padinfo)
-        : flag_formatter(padinfo)
+        : flag_formatter(padinfo, details::attr_flags::stop)
     {}
     void format(const details::log_msg &, const std::tm &, memory_buf_t &dest) override
     {
@@ -811,13 +811,11 @@ class attr_formatter_key final : public flag_formatter
 {
 public:
     explicit attr_formatter_key(padding_info padinfo)
-        : flag_formatter(padinfo)
+        : flag_formatter(padinfo, details::attr_flags::key)
     {}
-    void format(const details::log_msg &msg, const std::tm &, memory_buf_t &dest) override
+    void format(const details::log_msg &, const std::tm &, memory_buf_t &dest) override
     {
-        for (const details::attr& a : msg.attributes) {
-            fmt_helper::append_string_view(a.key, dest);
-        }
+        fmt_helper::append_string_view("", dest);
     }
 };
 
@@ -825,13 +823,11 @@ class attr_formatter_value final : public flag_formatter
 {
 public:
     explicit attr_formatter_value(padding_info padinfo)
-        : flag_formatter(padinfo)
+        : flag_formatter(padinfo, details::attr_flags::value)
     {}
-    void format(const details::log_msg &msg, const std::tm &, memory_buf_t &dest) override
+    void format(const details::log_msg &, const std::tm &, memory_buf_t &dest) override
     {
-        for (const details::attr& a : msg.attributes) {
-            fmt_helper::append_string_view(a.value, dest);
-        }
+        fmt_helper::append_string_view("", dest);
     }
 };
 
@@ -975,15 +971,44 @@ SPDLOG_INLINE void pattern_formatter::format(const details::log_msg &msg, memory
         }
     }
 
-    for (auto &f : formatters_) {
-        f->format(msg, cached_tm_, dest);
-    }
-    // TODO: make separate function, and add a custom format to attributes (for now just using logfmt)
-    for (const details::attr& a : msg.attributes) {
-        details::fmt_helper::append_string_view(a.key, dest);
-        details::fmt_helper::append_string_view("=\"", dest);
-        details::fmt_helper::append_string_view(a.value, dest);
-        details::fmt_helper::append_string_view("\" ", dest);
+    //todo merge
+    // for (auto &f : formatters_) {
+    //     f->format(msg, cached_tm_, dest);
+    // }
+    // // TODO: make separate function, and add a custom format to attributes (for now just using logfmt)
+    // for (const details::attr& a : msg.attributes) {
+    //     details::fmt_helper::append_string_view(a.key, dest);
+    //     details::fmt_helper::append_string_view("=\"", dest);
+    //     details::fmt_helper::append_string_view(a.value, dest);
+    //     details::fmt_helper::append_string_view("\" ", dest);
+
+    auto it_end = formatters_.begin();
+    for (auto it = formatters_.begin(); it != formatters_.end(); ++it)
+    {
+        if ((*it)->flag_ == details::attr_flags::start) {
+            if (msg.attributes.size() == 0) {
+                while((*it)->flag_ != details::attr_flags::stop && it != formatters_.end()) ++it;
+                it_end = it;
+            }
+            for (const details::attr& a : msg.attributes) {
+                for (auto it2 = it; it2 != formatters_.end(); ++it2) {
+                    if ((*it2)->flag_ == details::attr_flags::stop) {
+                        it_end = it2;
+                        break;
+                    } else if ((*it2)->flag_ == details::attr_flags::key) {
+                        // custom formatting function overload makes this even more messy with reinterpret casts, 
+                        // will just do manual key addition
+                        details::fmt_helper::append_string_view(a.key, dest);
+                    } else if ((*it2)->flag_ == details::attr_flags::value) {
+                        details::fmt_helper::append_string_view(a.value, dest);
+                    } else {
+                        (*it2)->format(msg, cached_tm_, dest);
+                    }
+                }
+            }
+            it = it_end;
+        }
+        (*it)->format(msg, cached_tm_, dest);
     }
 
     // write eol
