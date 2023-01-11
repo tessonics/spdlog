@@ -1248,7 +1248,7 @@ SPDLOG_INLINE void pattern_formatter::handle_flag_(char flag, details::padding_i
                     padding));
             break;
 
-    case ('['): // start attribute formatting
+    case ('('): // start attribute formatting
         formatters_.push_back(details::make_unique<details::attr_formatter_start>(padding));
         break;
 
@@ -1260,7 +1260,7 @@ SPDLOG_INLINE void pattern_formatter::handle_flag_(char flag, details::padding_i
         formatters_.push_back(details::make_unique<details::attr_formatter_value>(padding));
         break;
 
-    case (']'): // stop attribute formatting
+    case (')'): // stop attribute formatting
         formatters_.push_back(details::make_unique<details::attr_formatter_stop>(padding));
         break;
 
