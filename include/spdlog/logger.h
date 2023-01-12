@@ -77,30 +77,6 @@ public:
         : logger(std::move(name), sinks.begin(), sinks.end())
     {}
 
-    // Empty logger with fixed attributes
-    explicit logger(std::string name, const attribute_list& attrs)
-        : name_(std::move(name))
-        , fixed_attrs{attrs}
-        , sinks_()
-    {}
-
-    // Logger with range on sinks, fixed attrs
-    template<typename It>
-    logger(std::string name, It begin, It end, const attribute_list& attrs)
-        : name_(std::move(name))
-        , fixed_attrs{attrs}
-        , sinks_(begin, end)
-    {}
-
-    // Logger with single sink, fixed attrs
-    logger(std::string name, sink_ptr single_sink, const attribute_list& attrs)
-        : logger(std::move(name), {std::move(single_sink)}, attrs)
-    {}
-
-    // Logger with sinks init list, fixed attrs
-    logger(std::string name, sinks_init_list sinks, const attribute_list& attrs)
-        : logger(std::move(name), sinks.begin(), sinks.end(), attrs)
-    {}
 
     virtual ~logger() = default;
 
@@ -108,6 +84,16 @@ public:
     logger(logger &&other) SPDLOG_NOEXCEPT;
     logger &operator=(logger other) SPDLOG_NOEXCEPT;
     void swap(spdlog::logger &other) SPDLOG_NOEXCEPT;
+
+    // adds context to loggers via attribute list
+    void set_context(attribute_list attrs) {
+        attributes = std::move(attrs);
+    }
+
+    // removes context on loggers by clearing the attribute list
+    void clear_context() {
+        attributes.clear();
+    }
 
     template <typename T>
     void log(level::level_enum lvl, const T &msg, attribute_list attrs)
@@ -150,7 +136,7 @@ public:
         }
 
         details::log_msg log_msg(log_time, loc, name_, lvl, msg);
-        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
+        log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -164,7 +150,7 @@ public:
         }
 
         details::log_msg log_msg(loc, name_, lvl, msg);
-        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
+        log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
         log_msg.attributes.insert(log_msg.attributes.end(), attrs.begin(), attrs.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
@@ -178,7 +164,7 @@ public:
         }
 
         details::log_msg log_msg(loc, name_, lvl, msg);
-        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
+        log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -248,7 +234,7 @@ public:
         memory_buf_t buf;
         details::os::wstr_to_utf8buf(wstring_view_t(msg.data(), msg.size()), buf);
         details::log_msg log_msg(log_time, loc, name_, lvl, string_view_t(buf.data(), buf.size()));
-        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
+        log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -264,7 +250,7 @@ public:
         memory_buf_t buf;
         details::os::wstr_to_utf8buf(wstring_view_t(msg.data(), msg.size()), buf);
         details::log_msg log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()));
-        log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
+        log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
@@ -442,7 +428,7 @@ protected:
     err_handler custom_err_handler_{nullptr};
     details::backtracer tracer_;
 
-    std::vector<details::attr> fixed_attrs; // always printed, along with the level
+    std::vector<details::attr> attributes; // always printed, along with the level
 
     // common implementation for after templated public api has been resolved
     template<typename... Args>
@@ -464,7 +450,7 @@ protected:
 #endif
 
             details::log_msg log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()));
-            log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
+            log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
             log_it_(log_msg, log_enabled, traceback_enabled);
         }
         SPDLOG_LOGGER_CATCH(loc)
@@ -490,8 +476,8 @@ protected:
             memory_buf_t buf;
             details::os::wstr_to_utf8buf(wstring_view_t(wbuf.data(), wbuf.size()), buf);
             details::log_msg log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size()));
-            log_msg.attributes.insert(log_msg.attributes.end(), fixed_attrs.begin(), fixed_attrs.end());
-            log_it_(log_msg, log_enabled, traceback_enabled);
+            log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
+            log_og_msg, log_enabled, traceback_enabled);
         }
         SPDLOG_LOGGER_CATCH(loc)
     }
