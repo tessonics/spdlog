@@ -95,12 +95,6 @@ public:
         attributes.clear();
     }
 
-    template <typename T>
-    void log(level::level_enum lvl, const T &msg, attribute_list attrs)
-    {
-        log(source_loc{}, lvl, msg, attrs);
-    }
-
     template<typename... Args>
     void log(source_loc loc, level::level_enum lvl, format_string_t<Args...> fmt, Args &&... args)
     {
@@ -140,20 +134,6 @@ public:
         log_it_(log_msg, log_enabled, traceback_enabled);
     }
 
-    void log(source_loc loc, level::level_enum lvl, string_view_t msg, attribute_list attrs)
-    {
-        bool log_enabled = should_log(lvl);
-        bool traceback_enabled = tracer_.enabled();
-        if (!log_enabled && !traceback_enabled)
-        {
-            return;
-        }
-
-        details::log_msg log_msg(loc, name_, lvl, msg);
-        log_msg.attributes.insert(log_msg.attributes.end(), attributes.begin(), attributes.end());
-        log_msg.attributes.insert(log_msg.attributes.end(), attrs.begin(), attrs.end());
-        log_it_(log_msg, log_enabled, traceback_enabled);
-    }
     void log(source_loc loc, level::level_enum lvl, string_view_t msg)
     {
         bool log_enabled = should_log(lvl);
@@ -295,43 +275,6 @@ public:
         log(level::critical, fmt, std::forward<Args>(args)...);
     }
 #endif
-
-    // attributes endpoint
-    template<typename T>
-    void trace(const T &msg, attribute_list attrs)
-    {
-        log(level::trace, msg, attrs);
-    }
-
-    template<typename T>
-    void debug(const T &msg, attribute_list attrs)
-    {
-        log(level::debug, msg, attrs);
-    }
-
-    template<typename T>
-    void info(const T &msg, attribute_list attrs)
-    {
-        log(level::info, msg, attrs);
-    }
-
-    template<typename T>
-    void warn(const T &msg, attribute_list attrs)
-    {
-        log(level::warn, msg, attrs);
-    }
-
-    template<typename T>
-    void error(const T &msg, attribute_list attrs)
-    {
-        log(level::err, msg, attrs);
-    }
-
-    template<typename T>
-    void critical(const T &msg, attribute_list attrs)
-    {
-        log(level::critical, msg, attrs);
-    }
 
     // default endpoint
     template<typename T>
