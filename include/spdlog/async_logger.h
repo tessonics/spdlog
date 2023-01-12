@@ -36,26 +36,12 @@ class SPDLOG_API async_logger final : public std::enable_shared_from_this<async_
 
 public:
     template<typename It>
-    async_logger(std::string logger_name, It begin, It end, attribute_list attrs, std::weak_ptr<details::thread_pool> tp,
-        async_overflow_policy overflow_policy = async_overflow_policy::block)
-        : logger(std::move(logger_name), begin, end, attrs)
-        , thread_pool_(std::move(tp))
-        , overflow_policy_(overflow_policy)
-    {}
-
-    template<typename It>
     async_logger(std::string logger_name, It begin, It end, std::weak_ptr<details::thread_pool> tp,
         async_overflow_policy overflow_policy = async_overflow_policy::block)
         : logger(std::move(logger_name), begin, end)
         , thread_pool_(std::move(tp))
         , overflow_policy_(overflow_policy)
     {}
-
-    async_logger(std::string logger_name, sinks_init_list sinks_list, attribute_list attrs, std::weak_ptr<details::thread_pool> tp,
-        async_overflow_policy overflow_policy = async_overflow_policy::block);
-
-    async_logger(std::string logger_name, sink_ptr single_sink, attribute_list attrs, std::weak_ptr<details::thread_pool> tp,
-        async_overflow_policy overflow_policy = async_overflow_policy::block);
 
     async_logger(std::string logger_name, sinks_init_list sinks_list, std::weak_ptr<details::thread_pool> tp,
         async_overflow_policy overflow_policy = async_overflow_policy::block);

@@ -14,16 +14,6 @@
 #include <string>
 
 SPDLOG_INLINE spdlog::async_logger::async_logger(
-    std::string logger_name, sinks_init_list sinks_list, attribute_list attrs, std::weak_ptr<details::thread_pool> tp, async_overflow_policy overflow_policy)
-    : async_logger(std::move(logger_name), sinks_list.begin(), sinks_list.end(), std::move(attrs), std::move(tp), overflow_policy)
-{}
-
-SPDLOG_INLINE spdlog::async_logger::async_logger(
-    std::string logger_name, sink_ptr single_sink, attribute_list attrs, std::weak_ptr<details::thread_pool> tp, async_overflow_policy overflow_policy)
-    : async_logger(std::move(logger_name), {std::move(single_sink)}, std::move(attrs), std::move(tp), overflow_policy)
-{}
-
-SPDLOG_INLINE spdlog::async_logger::async_logger(
     std::string logger_name, sinks_init_list sinks_list, std::weak_ptr<details::thread_pool> tp, async_overflow_policy overflow_policy)
     : async_logger(std::move(logger_name), sinks_list.begin(), sinks_list.end(), std::move(tp), overflow_policy)
 {}
