@@ -1131,6 +1131,21 @@ SPDLOG_INLINE void pattern_formatter::format(const details::log_msg &msg, memory
         }
     }
 
+    if (msg.attributes.size() == 0) {
+        // non-iterator, a bit cleaner, still need to ignore new formatting flags
+        bool ignore_formatter = false;
+        for (auto& f : formatters_) {
+            if (f->flag_ == details::attr_flags::start) {
+                ignore_formatter = true;
+            } else if (f->flag_ == details::attr_flags::stop) {
+                ignore_formatter = false;
+            }
+
+            if (!ignore_formatter)
+                f->format(msg, cached_tm_, dest);
+        }
+    } else {
+    // ugly formatter iterator, due to needing to go back to previous iterators to repeat kv pairs
     auto it_end = formatters_.begin();
     if (msg.attributes.size() == 0) {
         bool ignore_formatter = false;
