@@ -148,6 +148,18 @@ inline void log(source_loc source,
     default_logger_raw()->log(source, lvl, fmt, std::forward<Args>(args)...);
 }
 
+inline void push_context(attribute_list attrs) {
+    default_logger_raw()->push_context(std::move(attrs));
+}
+
+inline void pop_context() {
+    default_logger_raw()->pop_context();
+}
+
+inline void clear_context() {
+    default_logger_raw()->clear_context();
+}
+
 template <typename... Args>
 inline void log(level::level_enum lvl, format_string_t<Args...> fmt, Args &&...args) {
     default_logger_raw()->log(source_loc{}, lvl, fmt, std::forward<Args>(args)...);
