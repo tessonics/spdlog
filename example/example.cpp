@@ -394,6 +394,7 @@ void replace_default_logger_example()
 }
 
 void attribute_example() {
+    spdlog::details::Key key = "attribute_key";
     spdlog::push_context(spdlog::attribute_list{{"attribute_key", "attribute value"}});
     spdlog::warn("EXPERIMENTAL: log with attributes");
     spdlog::clear_context();
@@ -412,9 +413,9 @@ void attribute_example() {
     s_logger->set_pattern(std::move(logfmt_pattern));
     #endif
 
-    s_logger->push_context(spdlog::attribute_list{{"key\n1", "value\n1"}});
+    s_logger->push_context(spdlog::attribute_list{{spdlog::attr_sv{"key\n1"}, "value\n1"}});
     s_logger->info("structured logging: test 1");
-    s_logger->push_context(spdlog::attribute_list{{"key\n2", "value\n2"}});
+    s_logger->push_context(spdlog::attribute_list{{spdlog::attr_sv{"key\n2"}, "value\n2"}});
     s_logger->info("structured logging: test 2");
     s_logger->pop_context();
     s_logger->info("structured logging: test 3");

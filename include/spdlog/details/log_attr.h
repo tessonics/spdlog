@@ -6,26 +6,22 @@
 #include <spdlog/common.h>
 
 namespace spdlog {
+using attr_sv = std::basic_string_view<char>;
+
 namespace details {
 
 // template<typename T>
 // concept composable = std::same_as<T, bool> || std::integral<T> || std::floating_point<T> || std::convertible_to<T, std::string_view>;
-
+// 
 
 struct Key 
 {
     std::string _key;
 
-    Key(string_view_t k) {
-        scramble(_key, k);
+    Key(attr_sv k) {
+        scramble(_key, string_view_t(k.data(), k.size()));
     }
     Key(std::string&& k) {
-        scramble(_key, k);
-    }
-    Key(std::string const& k) {
-        scramble(_key, k);
-    }
-    Key(const char* k) {
         scramble(_key, k);
     }
 };
@@ -42,9 +38,6 @@ struct Value
         scramble(_value, v);
     }
     Value(std::string const& v) {
-        scramble(_value, v);
-    }
-    Value(const char* v) {
         scramble(_value, v);
     }
     
@@ -82,18 +75,16 @@ struct Value
     Value(unsigned long long v) {
         _value = std::to_string(v);
     }
-    Value(float v) {
-        _value = std::to_string(v);
-    }
-    Value(double v) {
-        _value = std::to_string(v);
-    }
-    Value(long double v) {
-        _value = std::to_string(v);
-    }
-    Value(bool v) {
-        _value = v ? "true" : "false";
-    }
+    // floating point conversion to string is weird, let the api user do it
+    // Value(float v) {
+    //     _value = std::to_string(v);
+    // }
+    // Value(double v) {
+    //     _value = std::to_string(v);
+    // }
+    // Value(long double v) {
+    //     _value = std::to_string(v);
+    // }
 };
 
 struct attr
