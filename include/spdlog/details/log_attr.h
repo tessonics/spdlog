@@ -11,7 +11,7 @@ namespace details {
 
 template<typename T>
 struct is_string
-    : public std::integral_constant<bool, std::is_convertible<T, std::string>::value || std::is_convertible<T, std::string_view>::value>
+    : public std::integral_constant<bool, std::is_convertible<T, std::string>::value || std::is_convertible<T, string_view_t>::value>
 {};
 
 
