@@ -8,8 +8,10 @@
 namespace spdlog {
 namespace details {
 
-// template<typename T>
-// concept composable = std::same_as<T, bool> || std::integral<T> || std::floating_point<T> || std::convertible_to<T, std::string_view>;
+template<typename T>
+struct is_string
+    : public std::integral_constant<bool, std::is_convertible<T, std::string>::value || std::is_convertible<T, std::string_view>::value>
+{};
 
 
 struct Key 
@@ -95,6 +97,9 @@ struct Value
         _value = v ? "true" : "false";
     }
 };
+template<typename T>
+struct is_number : public std::integral_constant<bool, std::is_integral<T>::value || std::is_floating_point<T>::value>
+{};
 
 struct attr
 {
@@ -119,6 +124,24 @@ public:
     /*
     attr(std::string const& k, std::string const& v)
         : attr{string_view_t{k}, string_view_t{v}}
+    template<typename key_t, typename value_t, typename std::enable_if<is_string<key_t>::value, key_t>::type * = nullptr,
+        typename std::enable_if<is_string<value_t>::value, value_t>::type * = nullptr>
+    attr(key_t const &k, value_t const &v)
+        : key(std::string(k))
+        , value(std::string(v))
+    {}
+
+    template<typename key_t, typename value_t, typename std::enable_if<is_string<key_t>::value, key_t>::type * = nullptr,
+        typename std::enable_if<is_number<value_t>::value, value_t>::type * = nullptr>
+    attr(key_t const &k, value_t const &v)
+        : key(std::string(k))
+        , value(std::to_string(v))
+    {}
+
+    template<typename key_t, typename std::enable_if<is_string<key_t>::value, key_t>::type * = nullptr>
+    attr(key_t const &k, bool const v)
+        : key(std::string(k))
+        , value(v ? "true" : "false")
     {}
     
     attr(std::string&& k, std::string&& v)
