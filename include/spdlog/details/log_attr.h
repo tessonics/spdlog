@@ -128,9 +128,10 @@ public:
     template<typename key_t, typename value_t, typename std::enable_if<is_string<key_t>::value, key_t>::type * = nullptr,
         typename std::enable_if<is_string<value_t>::value, value_t>::type * = nullptr>
     attr(key_t const &k, value_t const &v)
-        : key(std::string(k))
-        , value(std::string(v))
-    {}
+    {
+        scramble(key, k);
+        scramble(value, v);
+    }
 
     template<typename key_t, typename value_t, typename std::enable_if<is_string<key_t>::value, key_t>::type * = nullptr,
         typename std::enable_if<is_number<value_t>::value, value_t>::type * = nullptr>
@@ -220,7 +221,11 @@ public:
         : attr{string_view_t{k}, v}
     {}
     attr(Key&& k, Value&& v) : key(std::move(k._key)), value(std::move(v._value)) {}
-    attr(Key const& k, Value const& v) : key(k._key), value(v._value) {}
+    
+    attr(Key const& k, Value const& v) : key(k._key), value(v._value) {
+        scramble(key, k);
+        value = std::to_string(v);
+    }
 };
 
 } // namespace details
