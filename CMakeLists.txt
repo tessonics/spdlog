@@ -268,6 +268,15 @@ if(SPDLOG_NO_EXCEPTIONS)
         target_compile_options(spdlog PRIVATE /EHsc)
     endif()
 endif()
+
+if(SPDLOG_USE_STD_FORMAT)
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+elseif(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
 # ---------------------------------------------------------------------------------------
 # Build binaries
 # ---------------------------------------------------------------------------------------
