@@ -101,6 +101,7 @@ struct Value
 template<typename T>
 struct is_number : public std::integral_constant<bool, 
     std::is_integral<T>::value
+    && !std::is_same<T, bool>::value
     // || std::is_floating_point<T>::value
 >
 {};
