@@ -282,7 +282,7 @@ struct fmt::formatter<my_type> : fmt::formatter<std::string>
 {
     auto format(my_type my, format_context &ctx) -> decltype(ctx.out())
     {
-        return format_to(ctx.out(), "[my_type i={}]", my.i);
+        return fmt::format_to(ctx.out(), "[my_type i={}]", my.i);
     }
 };
 
@@ -395,8 +395,36 @@ void replace_default_logger_example()
 
 void attribute_example() {
     spdlog::push_context(spdlog::attribute_list{{"attribute_key", "attribute value"}});
-    spdlog::warn("EXPERIMENTAL: log with attributes");
+    spdlog::info("EXPERIMENTAL: log with attributes");
     spdlog::clear_context();
+    
+    char s = 0;
+    int8_t us = 1;
+    const int16_t& i = 2;
+    unsigned int ui = 3;
+    long l = 4;
+    unsigned long ul = 5;
+    long long ll = 6;
+    unsigned long long ull = 7;
+    spdlog::push_context({{"short_key", s }});
+    spdlog::push_context({{"ushort_key", us }});
+    spdlog::push_context({{"int_key", i }});
+    spdlog::push_context({{"uint_key", ui }});
+    spdlog::push_context({{"uint_ref_key", static_cast<unsigned int&>(ui) }});
+    spdlog::push_context({{"long", l }});
+    spdlog::push_context({{"ulong", ul }});
+    spdlog::push_context({{"llong", ll }});
+    spdlog::push_context({{"ullong", ull }});
+    
+    // floats shouldnt work
+    // spdlog::push_context({{"float", 1.0f }});
+    // spdlog::push_context({{"double", 1.0 }});
+    
+    // bools also shouldnt work
+    // spdlog::push_context({{"bool", true }});
+    spdlog::warn("Oops I forgot to clear the context. What will happen?");
+    
+    
 
     // structured logging using attributes
 
@@ -411,10 +439,10 @@ void attribute_example() {
     std::string logfmt_pattern = "time=%Y-%m-%dT%H:%M:%S.%f%z name=\"%n\" level=%^%l%$ process=%P thread=%t message=\"%v\"%( %K=\"%V\"%)";
     s_logger->set_pattern(std::move(logfmt_pattern));
     #endif
-
+    
     s_logger->push_context(spdlog::attribute_list{{"key\n1", "value\n1"}});
     s_logger->info("structured logging: test 1");
-    s_logger->push_context(spdlog::attribute_list{{"key\n2", "value\n2"}});
+    s_logger->push_context(spdlog::attribute_list{{"key\n2", 1}});
     s_logger->info("structured logging: test 2");
     s_logger->pop_context();
     s_logger->info("structured logging: test 3");
