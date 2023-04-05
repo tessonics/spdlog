@@ -370,18 +370,18 @@ inline fmt::basic_string_view<T> to_string_view(fmt::basic_format_string<T, Args
 {
     return fmt;
 }
-#elif __cpp_lib_format >= 202207L
-template<typename T, typename... Args>
-SPDLOG_CONSTEXPR_FUNC std::basic_string_view<T> to_string_view(std::basic_format_string<T, Args...> fmt) SPDLOG_NOEXCEPT
-{
-    return fmt.get();
-}
 #elif defined(SPDLOG_USE_STD_STRING_VIEW) && !defined(SPDLOG_USE_STD_FORMAT)
 template<typename T, typename... Args>
 SPDLOG_CONSTEXPR_FUNC std::basic_string_view<T> to_string_view(fmt::basic_format_string<T, Args...> fmt) SPDLOG_NOEXCEPT
 {
     auto tmp = fmt::basic_string_view<T>{fmt};
     return std::string_view{tmp.data(), tmp.size()};
+}
+#elif __cpp_lib_format >= 202207L
+template<typename T, typename... Args>
+SPDLOG_CONSTEXPR_FUNC std::basic_string_view<T> to_string_view(std::basic_format_string<T, Args...> fmt) SPDLOG_NOEXCEPT
+{
+    return fmt.get();
 }
 #endif
 
