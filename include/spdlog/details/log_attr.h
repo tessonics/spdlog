@@ -227,8 +227,8 @@ public:
     attr(Key&& k, Value&& v) : key(std::move(k._key)), value(std::move(v._value)) {}
     
     attr(Key const& k, Value const& v) : key(k._key), value(v._value) {
-        scramble(key, k);
-        value = std::to_string(v);
+        //scramble(key, k);
+        //value = std::to_string(v);
     }
 };
 
