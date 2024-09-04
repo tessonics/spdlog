@@ -270,7 +270,7 @@ if(BUILD_SHARED_LIBS)
         set(VERSION_RC ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)        
     endif()
-    add_library(spdlog SHARED ${SPDLOG_SRCS} ${SPDLOG_HEADERS} ${VERSION_RC})
+    add_library(spdlog SHARED ${SPDLOG_SRCS} ${VERSION_RC})
     target_compile_definitions(spdlog PUBLIC SPDLOG_SHARED_LIB)
     if(MSVC)
         # disable dlls related warnings on msvc
@@ -278,7 +278,7 @@ if(BUILD_SHARED_LIBS)
                                              /wd4275>)        
     endif()
 else()
-    add_library(spdlog STATIC ${SPDLOG_SRCS} ${SPDLOG_HEADERS})
+    add_library(spdlog STATIC ${SPDLOG_SRCS})
 endif()
 add_library(spdlog::spdlog ALIAS spdlog)
 
@@ -287,7 +287,12 @@ if(SPDLOG_SYSTEM_INCLUDES)
     set(SPDLOG_INCLUDES_LEVEL "SYSTEM")
 endif()
 
-set_target_properties(spdlog PROPERTIES PUBLIC_HEADER "${SPDLOG_HEADERS}")
+target_sources(spdlog
+    PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS include/spdlog
+    FILES ${SPDLOG_HEADERS}
+)
 
 target_include_directories(spdlog ${SPDLOG_INCLUDES_LEVEL} PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
@@ -370,7 +375,8 @@ if(SPDLOG_INSTALL)
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/spdlog)
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/spdlog
+        )
 
     # ---------------------------------------------------------------------------------------
     # Install pkg-config file
