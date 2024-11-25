@@ -25,7 +25,7 @@
     #define SPDLOG_LOGGER_CATCH(location)                                                                  \
         catch (const std::exception &ex) {                                                                 \
             if (!location.empty()) {                                                                       \
-                err_handler_(fmt_lib::format("{} [{}({})]", ex.what(), location.filename, location.line)); \
+                err_handler_(fmt_lib::format(SPDLOG_FMT_STRING("{} [{}({})]"), ex.what(), location.filename, location.line)); \
             } else {                                                                                       \
                 err_handler_(ex.what());                                                                   \
             }                                                                                              \
