@@ -65,7 +65,7 @@ protected:
     // Simply maps spdlog's log level to syslog priority level.
     //
     virtual int syslog_prio_from_level(const details::log_msg &msg) const {
-        return syslog_levels_.at(static_cast<levels_array::size_type>(msg.level));
+        return syslog_levels_.at(static_cast<levels_array::size_type>(msg.log_level));
     }
 
     using levels_array = std::array<int, 7>;
