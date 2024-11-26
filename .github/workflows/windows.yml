@@ -93,7 +93,7 @@ jobs:
             BUILD_EXAMPLE: 'ON'
             USE_STD_FORMAT: 'OFF'
             CXX_STANDARD: 17
-          - GENERATOR: "Visual Studio 17 2022"
+          - GENERATOR: "Visual Studio 16 2019"
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
