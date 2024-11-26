@@ -8,7 +8,7 @@ permissions:
 jobs:
   build:
     runs-on: macOS-latest
-    name: "macOS Clang (C++11, Release)"
+    name: "macOS Clang (C++17, Release)"
     steps:
       - uses: actions/checkout@v4
       - name: Build
@@ -16,7 +16,7 @@ jobs:
           mkdir -p build && cd build
           cmake .. \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_STANDARD=11 \
+            -DCMAKE_CXX_STANDARD=17 \
             -DSPDLOG_BUILD_EXAMPLE=ON \
             -DSPDLOG_BUILD_EXAMPLE_HO=ON \
             -DSPDLOG_BUILD_WARNINGS=ON \

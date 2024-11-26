@@ -93,7 +93,7 @@ jobs:
             BUILD_EXAMPLE: 'ON'
             USE_STD_FORMAT: 'OFF'
             CXX_STANDARD: 17
-          - GENERATOR: "Visual Studio 16 2019"
+          - GENERATOR: "Visual Studio 17 2022"
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
@@ -101,16 +101,7 @@ jobs:
             WCHAR_FILES: 'OFF'
             BUILD_EXAMPLE: 'ON'
             USE_STD_FORMAT: 'OFF'
-            CXX_STANDARD: 14
-          - GENERATOR: "Visual Studio 16 2019"
-            BUILD_TYPE: Release
-            BUILD_SHARED: 'ON'
-            FATAL_ERRORS: 'ON'
-            WCHAR: 'OFF'
-            WCHAR_FILES: 'OFF'
-            BUILD_EXAMPLE: 'ON'
-            USE_STD_FORMAT: 'OFF'
-            CXX_STANDARD: 11
+            CXX_STANDARD: 20
 
     steps:
       - name: Checkout code
