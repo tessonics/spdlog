@@ -27,6 +27,7 @@ public:
 
     static filename_t calc_filename(const filename_t &filename, std::size_t index);
     filename_t filename();
+    void rotate_now();
 
 protected:
     void sink_it_(const details::log_msg &msg) override;
