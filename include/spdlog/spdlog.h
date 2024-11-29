@@ -12,7 +12,6 @@
 #include <chrono>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <string_view>
 
@@ -143,6 +142,9 @@ inline void log(level lvl, format_string_t<Args...> fmt, Args &&...args) {
     default_logger_raw()->log(lvl, fmt, std::forward<Args>(args)...);
 }
 
+inline void log(level lvl, std::string_view msg) { default_logger_raw()->log(lvl, msg); }
+inline void log(source_loc loc, level lvl, std::string_view msg) { default_logger_raw()->log(loc, lvl, msg); }
+
 // template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
 // inline void log(source_loc loc, level lvl, S fmt, Args &&...args) {
 //     default_logger_raw()->log(loc, lvl, fmt, std::forward<Args>(args)...);
@@ -185,17 +187,17 @@ inline void critical(loc_with_fmt fmt, Args &&...args) {
 }
 
 // log functions with no format string, just string
-inline void trace(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::trace, msg); }
+inline void trace(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::trace, msg); }
 
-inline void debug(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::debug, msg); }
+inline void debug(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::debug, msg); }
 
-inline void info(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::info, msg); }
+inline void info(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::info, msg); }
 
-inline void warn(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, spdlog::level::warn, msg); }
+inline void warn(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, spdlog::level::warn, msg); }
 
-inline void error(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::err, msg); }
+inline void error(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::err, msg); }
 
-inline void critical(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::critical, msg); }
+inline void critical(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::critical, msg); }
 #else
 template <typename... Args>
 inline void trace(format_string_t<Args...> fmt, Args &&...args) {
@@ -228,17 +230,17 @@ inline void critical(format_string_t<Args...> fmt, Args &&...args) {
 }
 
 // log functions with no format string, just string
-inline void trace(string_view_t msg) { log(level::trace, msg); }
+inline void trace(std::string_view msg) { log(level::trace, msg); }
 
-inline void debug(string_view_t msg) { log(level::debug, msg); }
+inline void debug(std::string_view msg) { log(level::debug, msg); }
 
-inline void info(string_view_t msg) { log(level::info, msg); }
+inline void info(std::string_view msg) { log(level::info, msg); }
 
-inline void warn(string_view_t msg) { log(level::warn, msg); }
+inline void warn(std::string_view msg) { log(level::warn, msg); }
 
-inline void error(string_view_t msg) { log(level::err, msg); }
+inline void error(std::string_view msg) { log(level::err, msg); }
 
-inline void critical(string_view_t msg) { log(level::critical, msg); }
+inline void critical(std::string_view msg) { log(level::critical, msg); }
 #endif
 
 }  // namespace spdlog
