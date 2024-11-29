@@ -70,8 +70,8 @@ jobs:
         shell: pwsh
         env:
           PATH: ${{ env.PATH }};${{ github.workspace }}\build\_deps\catch2-build\src\${{ matrix.config.BUILD_TYPE }};${{ github.workspace }}\build\${{ matrix.config.BUILD_TYPE }}
-        run: |
-          .\build\tests\${{ matrix.config.BUILD_TYPE }}\spdlog-utests.exe
+        run: ctest
+          
 
   # -----------------------------------------------------------------------
   # MSVC 2019 build matrix
@@ -131,5 +131,5 @@ jobs:
         shell: pwsh
         env:
           PATH: ${{ env.PATH }};${{ github.workspace }}\build\_deps\catch2-build\src\${{ matrix.config.BUILD_TYPE }};${{ github.workspace }}\build\${{ matrix.config.BUILD_TYPE }}
-        run: |
-          .\build\tests\${{ matrix.config.BUILD_TYPE }}\spdlog-utests.exe
+        run: ctest
+          
