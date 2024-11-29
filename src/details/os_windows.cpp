@@ -23,6 +23,7 @@
 #include <ctime>
 #include <string>
 #include <thread>
+#include <cassert>
 
 #include "spdlog/common.h"
 #include "spdlog/details/os.h"
