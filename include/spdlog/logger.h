@@ -66,7 +66,6 @@ public:
 
     virtual ~logger() = default;
 
-    // log functions
     template <typename... Args>
     void log(source_loc loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
         if (should_log(lvl)) {
