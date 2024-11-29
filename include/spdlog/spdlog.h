@@ -143,15 +143,15 @@ inline void log(level lvl, format_string_t<Args...> fmt, Args &&...args) {
     default_logger_raw()->log(lvl, fmt, std::forward<Args>(args)...);
 }
 
-template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
-inline void log(source_loc loc, level lvl, S fmt, Args &&...args) {
-    default_logger_raw()->log(loc, lvl, fmt, std::forward<Args>(args)...);
-}
-
-template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
-inline void log(level lvl, S fmt, Args &&...args) {
-    default_logger_raw()->log(lvl, fmt, std::forward<Args>(args)...);
-}
+// template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
+// inline void log(source_loc loc, level lvl, S fmt, Args &&...args) {
+//     default_logger_raw()->log(loc, lvl, fmt, std::forward<Args>(args)...);
+// }
+//
+// template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
+// inline void log(level lvl, S fmt, Args &&...args) {
+//     default_logger_raw()->log(lvl, fmt, std::forward<Args>(args)...);
+// }
 
 #ifdef SPDLOG_SOURCE_LOCATION
 template <typename... Args>
