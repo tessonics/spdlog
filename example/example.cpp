@@ -29,6 +29,7 @@ void replace_default_logger_example();
 
 #include "spdlog/cfg/env.h"  // support for loading levels from the environment variable
 #include "spdlog/spdlog.h"
+#include "spdlog/version.h"
 
 int main(int, char *[]) {
     // Log levels can be loaded from argv/env using "SPDLOG_LEVEL"

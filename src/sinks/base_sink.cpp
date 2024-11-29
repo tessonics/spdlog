@@ -53,6 +53,5 @@ void spdlog::sinks::base_sink<Mutex>::set_formatter_(std::unique_ptr<spdlog::for
 }
 
 // template instantiations
-
 template class SPDLOG_API spdlog::sinks::base_sink<std::mutex>;
 template class SPDLOG_API spdlog::sinks::base_sink<spdlog::details::null_mutex>;
