@@ -12,15 +12,15 @@ namespace details {
 // if you pass custom strings to source location, make sure they outlive the log_msg_buffer
 log_msg_buffer::log_msg_buffer(const log_msg &orig_msg)
     : log_msg{orig_msg} {
-    buffer.append(logger_name.begin(), logger_name.end());
-    buffer.append(payload.begin(), payload.end());
+    buffer.append(logger_name);
+    buffer.append(payload);
     update_string_views();
 }
 
 log_msg_buffer::log_msg_buffer(const log_msg_buffer &other)
     : log_msg{other} {
-    buffer.append(logger_name.begin(), logger_name.end());
-    buffer.append(payload.begin(), payload.end());
+    buffer.append(logger_name);
+    buffer.append(payload);
     update_string_views();
 }
 
