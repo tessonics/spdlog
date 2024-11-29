@@ -69,24 +69,16 @@ public:
     template <typename... Args>
     void log(source_loc loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
         if (should_log(lvl)) {
-            log_with_format_(loc, lvl, details::to_string_view(fmt), std::forward<Args>(args)...);
+            log_with_format_(loc, lvl, fmt, std::forward<Args>(args)...);
         }
     }
 
     template <typename... Args>
     void log(level lvl, format_string_t<Args...> fmt, Args &&...args) {
         if (should_log(lvl)) {
-            log_with_format_(source_loc{}, lvl, details::to_string_view(fmt), std::forward<Args>(args)...);
+            log_with_format_(source_loc{}, lvl, fmt, std::forward<Args>(args)...);
         }
     }
-
-    template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
-    void log(source_loc loc, level lvl, S fmt, Args &&...args) {
-        if (should_log(lvl)) {
-            log_with_format_(loc, lvl, fmt, std::forward<Args>(args)...);
-        }
-    }
-
     // log with no format string, just string message
     void log(source_loc loc, level lvl, string_view_t msg) {
         if (should_log(lvl)) {
@@ -192,7 +184,7 @@ protected:
     // common implementation for after templated public api has been resolved to format string and
     // args
     template <typename... Args>
-    void log_with_format_(source_loc loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
+    void log_with_format_(source_loc loc, level lvl, const format_string_t<Args...> &fmt, Args &&...args) {
         assert(should_log(lvl));
         SPDLOG_TRY {
 #ifdef SPDLOG_USE_STD_FORMAT
