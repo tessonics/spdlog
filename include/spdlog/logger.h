@@ -16,6 +16,7 @@
 
 #include <cassert>
 #include <vector>
+#include <iterator>
 
 #include "./common.h"
 #include "./details/log_msg.h"
