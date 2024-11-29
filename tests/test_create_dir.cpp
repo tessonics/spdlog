@@ -75,11 +75,11 @@ TEST_CASE("dir_name", "[create_dir]") {
 
 #ifdef _WIN32
 
-//
-// test windows cases when drive letter is given e.g. C:\\some-folder
-//
-#include <windows.h>
-#include <fileapi.h>
+    //
+    // test windows cases when drive letter is given e.g. C:\\some-folder
+    //
+    #include <fileapi.h>
+    #include <windows.h>
 
 std::string get_full_path(const std::string &relative_folder_path) {
     char full_path[MAX_PATH];
@@ -100,7 +100,7 @@ spdlog::filename_t::value_type find_non_existing_drive() {
         std::string root_path = std::string(1, drive) + ":\\";
         UINT drive_type = GetDriveTypeA(root_path.c_str());
         if (drive_type == DRIVE_NO_ROOT_DIR) {
-            return static_cast <spdlog::filename_t::value_type>(drive);
+            return static_cast<spdlog::filename_t::value_type>(drive);
         }
     }
     return '\0';  // No available drive found
@@ -125,11 +125,10 @@ TEST_CASE("non_existing_drive", "[create_dir]") {
     spdlog::filename_t path;
 
     auto non_existing_drive = find_non_existing_drive();
-    path += non_existing_drive ;
+    path += non_existing_drive;
     path += SPDLOG_FILENAME_T(":\\");
     REQUIRE(create_dir(path) == false);
     path += SPDLOG_FILENAME_T("subdir");
     REQUIRE(create_dir(path) == false);
-
 }
 #endif  // _WIN32

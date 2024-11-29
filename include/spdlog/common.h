@@ -159,7 +159,7 @@ using atomic_level_t = std::atomic<level>;
 
 constexpr auto levels_count = level_to_number(level::n_levels);
 constexpr std::array<std::string_view, levels_count> level_string_views{"trace", "debug",    "info", "warning",
-                                                                     "error", "critical", "off"};
+                                                                        "error", "critical", "off"};
 constexpr std::array<std::string_view, levels_count> short_level_names{"T", "D", "I", "W", "E", "C", "O"};
 
 [[nodiscard]] constexpr std::string_view to_string_view(spdlog::level lvl) noexcept {

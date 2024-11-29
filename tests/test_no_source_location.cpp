@@ -1,5 +1,5 @@
 #ifndef SPDLOG_NO_SOURCE_LOC
-#define SPDLOG_NO_SOURCE_LOC
+    #define SPDLOG_NO_SOURCE_LOC
 #endif
 
 #include "includes.h"

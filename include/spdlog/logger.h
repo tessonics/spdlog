@@ -15,25 +15,25 @@
 // formatted data, and support for different format per sink.
 
 #include <cassert>
-#include <vector>
 #include <iterator>
+#include <vector>
 
 #include "./common.h"
 #include "./details/log_msg.h"
 #include "./sinks/sink.h"
 
 #ifndef SPDLOG_NO_EXCEPTIONS
-    #define SPDLOG_LOGGER_CATCH(location)                                                                  \
-        catch (const std::exception &ex) {                                                                 \
-            if (!location.empty()) {                                                                       \
+    #define SPDLOG_LOGGER_CATCH(location)                                                                                     \
+        catch (const std::exception &ex) {                                                                                    \
+            if (!location.empty()) {                                                                                          \
                 err_handler_(fmt_lib::format(SPDLOG_FMT_STRING("{} [{}({})]"), ex.what(), location.filename, location.line)); \
-            } else {                                                                                       \
-                err_handler_(ex.what());                                                                   \
-            }                                                                                              \
-        }                                                                                                  \
-        catch (...) {                                                                                      \
-            err_handler_("Rethrowing unknown exception in logger");                                        \
-            throw;                                                                                         \
+            } else {                                                                                                          \
+                err_handler_(ex.what());                                                                                      \
+            }                                                                                                                 \
+        }                                                                                                                     \
+        catch (...) {                                                                                                         \
+            err_handler_("Rethrowing unknown exception in logger");                                                           \
+            throw;                                                                                                            \
         }
 #else
     #define SPDLOG_LOGGER_CATCH(location)
