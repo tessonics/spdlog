@@ -145,60 +145,6 @@ inline void log(level lvl, format_string_t<Args...> fmt, Args &&...args) {
 inline void log(level lvl, std::string_view msg) { default_logger_raw()->log(lvl, msg); }
 inline void log(source_loc loc, level lvl, std::string_view msg) { default_logger_raw()->log(loc, lvl, msg); }
 
-// template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
-// inline void log(source_loc loc, level lvl, S fmt, Args &&...args) {
-//     default_logger_raw()->log(loc, lvl, fmt, std::forward<Args>(args)...);
-// }
-//
-// template <typename S, typename = is_convertible_to_sv<S>, typename... Args>
-// inline void log(level lvl, S fmt, Args &&...args) {
-//     default_logger_raw()->log(lvl, fmt, std::forward<Args>(args)...);
-// }
-
-#ifdef SPDLOG_SOURCE_LOCATION
-template <typename... Args>
-inline void trace(loc_with_fmt fmt, Args &&...args) {
-    log(fmt.loc, level::trace, fmt.fmt_string, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void debug(loc_with_fmt fmt, Args &&...args) {
-    log(fmt.loc, level::debug, fmt.fmt_string, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void info(loc_with_fmt fmt, Args &&...args) {
-    log(fmt.loc, level::info, fmt.fmt_string, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void warn(loc_with_fmt fmt, Args &&...args) {
-    log(fmt.loc, spdlog::level::warn, fmt.fmt_string, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void error(loc_with_fmt fmt, Args &&...args) {
-    log(fmt.loc, level::err, fmt.fmt_string, std::forward<Args>(args)...);
-}
-
-template <typename... Args>
-inline void critical(loc_with_fmt fmt, Args &&...args) {
-    log(fmt.loc, level::critical, fmt.fmt_string, std::forward<Args>(args)...);
-}
-
-// log functions with no format string, just string
-inline void trace(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::trace, msg); }
-
-inline void debug(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::debug, msg); }
-
-inline void info(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::info, msg); }
-
-inline void warn(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, spdlog::level::warn, msg); }
-
-inline void error(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::err, msg); }
-
-inline void critical(std::string_view msg, source_loc loc = source_loc::current()) { log(loc, level::critical, msg); }
-#else
 template <typename... Args>
 inline void trace(format_string_t<Args...> fmt, Args &&...args) {
     log(level::trace, fmt, std::forward<Args>(args)...);
@@ -241,7 +187,6 @@ inline void warn(std::string_view msg) { log(level::warn, msg); }
 inline void error(std::string_view msg) { log(level::err, msg); }
 
 inline void critical(std::string_view msg) { log(level::critical, msg); }
-#endif
 
 }  // namespace spdlog
 
@@ -258,11 +203,12 @@ inline void critical(std::string_view msg) { log(level::critical, msg); }
 // SPDLOG_LEVEL_OFF
 //
 
-#ifdef SPDLOG_SOURCE_LOCATION
+#ifndef SPDLOG_NO_SOURCE_LOC
     #define SPDLOG_LOGGER_CALL(logger, level, ...) \
         (logger)->log(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, level, __VA_ARGS__)
-#else
-    #define SPDLOG_LOGGER_CALL(logger, level, ...) (logger)->log(spdlog::source_loc{}, level, __VA_ARGS__)
+    #else
+        #define SPDLOG_LOGGER_CALL(logger, level, ...) \
+        (logger)->log(spdlog::source_loc{}, level, __VA_ARGS__)
 #endif
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_TRACE

@@ -27,9 +27,6 @@ void custom_flags_example();
 void file_events_example();
 void replace_default_logger_example();
 void mdc_example();
-// Uncomment to enable source location support.
-// This will add filename/line/column info to the log (and in to the resulting binary so take care).
-// #define SPDLOG_SOURCE_LOCATION
 
 #include "spdlog/cfg/env.h"  // support for loading levels from the environment variable
 #include "spdlog/spdlog.h"

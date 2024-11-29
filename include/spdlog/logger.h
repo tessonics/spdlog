@@ -108,52 +108,6 @@ public:
         }
     }
 
-#ifdef SPDLOG_SOURCE_LOCATION  // off by default. define SPDLOG_SOURCE_LOCATION before including
-                               // spdlog to enable.
-    template <typename... Args>
-    void trace(loc_with_fmt fmt, Args &&...args) {
-        log(fmt.loc, level::trace, fmt.fmt_string, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void debug(loc_with_fmt fmt, Args &&...args) {
-        log(fmt.loc, level::debug, fmt.fmt_string, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void info(loc_with_fmt fmt, Args &&...args) {
-        log(fmt.loc, level::info, fmt.fmt_string, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void warn(loc_with_fmt fmt, Args &&...args) {
-        log(fmt.loc, level::warn, fmt.fmt_string, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void error(loc_with_fmt fmt, Args &&...args) {
-        log(fmt.loc, level::err, fmt.fmt_string, std::forward<Args>(args)...);
-    }
-
-    template <typename... Args>
-    void critical(loc_with_fmt fmt, Args &&...args) {
-        log(fmt.loc, level::critical, fmt.fmt_string, std::forward<Args>(args)...);
-    }
-
-    // log functions with no format string, just string
-
-    void trace(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::trace, msg); }
-
-    void debug(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::debug, msg); }
-
-    void info(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::info, msg); }
-
-    void warn(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::warn, msg); }
-
-    void error(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::err, msg); }
-
-    void critical(string_view_t msg, source_loc loc = source_loc::current()) { log(loc, level::critical, msg); }
-#else   // without source location
     template <typename... Args>
     void trace(format_string_t<Args...> fmt, Args &&...args) {
         log(level::trace, fmt, std::forward<Args>(args)...);
@@ -191,7 +145,6 @@ public:
     void warn(string_view_t msg) { log(level::warn, msg); }
     void error(string_view_t msg) { log(level::err, msg); }
     void critical(string_view_t msg) { log(level::critical, msg); }
-#endif  // SPDLOG_SOURCE_LOCATION
 
     // return true if logging is enabled for the given level.
     [[nodiscard]] bool should_log(level msg_level) const { return msg_level >= level_.load(std::memory_order_relaxed); }
