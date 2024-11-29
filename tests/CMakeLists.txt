@@ -50,6 +50,7 @@ set(SPDLOG_UTESTS_SOURCES
     test_circular_q.cpp
     test_ringbuffer_sink.cpp
     test_source_location.cpp
+    test_no_source_location.cpp
     test_log_level.cpp
     test_include_sinks.cpp)
 
