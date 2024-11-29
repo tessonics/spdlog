@@ -130,8 +130,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
 	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
-	set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)	   
-		
+	set(CMAKE_PDB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$<CONFIG>)
+
 	# make sure __cplusplus is defined
 	add_compile_options(/Zc:__cplusplus)
 	# enable parallel build for the solution
@@ -218,10 +218,9 @@ set(SPDLOG_HEADERS
     "include/spdlog/sinks/systemd_sink.h"
     "include/spdlog/sinks/tcp_sink.h"
     "include/spdlog/sinks/udp_sink.h"
-    "include/spdlog/mdc.h"
 )
 
-set(SPDLOG_SRCS 
+set(SPDLOG_SRCS
     "src/async_logger.cpp"
     "src/common.cpp"
     "src/logger.cpp"
@@ -233,7 +232,7 @@ set(SPDLOG_SRCS
     "src/details/log_msg_buffer.cpp"
     "src/details/periodic_worker.cpp"
     "src/details/registry.cpp"
-    "src/details/thread_pool.cpp"    
+    "src/details/thread_pool.cpp"
     "src/sinks/ansicolor_sink.cpp"
     "src/sinks/base_sink.cpp"
     "src/sinks/basic_file_sink.cpp"
@@ -267,14 +266,14 @@ list(APPEND SPDLOG_HEADERS ${OUT_CONFIG_FILE})
 if(BUILD_SHARED_LIBS)
     if(WIN32)
         set(VERSION_RC ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)        
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)
     endif()
     add_library(spdlog SHARED ${SPDLOG_SRCS} ${SPDLOG_HEADERS} ${VERSION_RC})
     target_compile_definitions(spdlog PUBLIC SPDLOG_SHARED_LIB)
     if(MSVC)
         # disable dlls related warnings on msvc
         target_compile_options(spdlog PUBLIC $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<NOT:$<COMPILE_LANGUAGE:CUDA>>>:/wd4251
-                                             /wd4275>)        
+                                             /wd4275>)
     endif()
 else()
     add_library(spdlog STATIC ${SPDLOG_SRCS} ${SPDLOG_HEADERS})
@@ -303,7 +302,7 @@ set_target_properties(spdlog PROPERTIES DEBUG_POSTFIX d)
 # set source groups for visual studio
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include PREFIX include FILES ${SPDLOG_HEADERS})
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX sources FILES ${SPDLOG_SRCS})    
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX sources FILES ${SPDLOG_SRCS})
     source_group(sources FILES ${VERSION_RC})
 endif()
 

@@ -26,7 +26,6 @@ void udp_example();
 void custom_flags_example();
 void file_events_example();
 void replace_default_logger_example();
-void mdc_example();
 
 #include "spdlog/cfg/env.h"  // support for loading levels from the environment variable
 #include "spdlog/spdlog.h"
@@ -72,7 +71,6 @@ int main(int, char *[]) {
         custom_flags_example();
         file_events_example();
         replace_default_logger_example();
-        mdc_example();
 
         // Flush all *registered* loggers using a worker thread every 3 seconds.
         // note: registered loggers *must* be thread safe for this to work correctly!
@@ -345,15 +343,5 @@ void replace_default_logger_example() {
     spdlog::debug("This message should not be displayed!");
     spdlog::set_level(spdlog::level::trace);
     spdlog::debug("This message should be displayed..");
-
     spdlog::set_default_logger(old_logger);
-}
-
-#include "spdlog/mdc.h"
-void mdc_example() {
-    spdlog::mdc::put("key1", "value1");
-    spdlog::mdc::put("key2", "value2");
-    // use the %& formatter flag to print all MDC values
-    spdlog::set_pattern("[%H:%M:%S %z] [%^%L%$] [%&] %v");
-    spdlog::info("Some log message with context");
 }
