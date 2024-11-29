@@ -202,6 +202,7 @@ set(SPDLOG_SRCS
     "src/logger.cpp"
     "src/pattern_formatter.cpp"
     "src/spdlog.cpp"
+    "src/cfg/helpers.cpp"
     "src/details/file_helper.cpp"
     "src/details/log_msg.cpp"
     "src/details/log_msg_buffer.cpp"
