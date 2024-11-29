@@ -8,17 +8,6 @@
 
 using filename_memory_buf_t = spdlog::memory_buf_t;
 
-// #ifdef SPDLOG_WCHAR_FILENAMES
-// std::string filename_buf_to_utf8string(const filename_memory_buf_t &w) {
-//     spdlog::memory_buf_t buf;
-//     spdlog::details::os::wstr_to_utf8buf(spdlog::wstring_view_t(w.data(), w.size()), buf);
-//     return SPDLOG_BUF_TO_STRING(buf);
-// }
-// #else
-// std::string filename_buf_to_utf8string(const filename_memory_buf_t &w) { return SPDLOG_BUF_TO_STRING(w); }
-// #endif
-
-std::string filename_buf_to_utf8string(const filename_memory_buf_t &w) { return SPDLOG_BUF_TO_STRING(w); }
 
 TEST_CASE("daily_logger with dateonly calculator", "[daily_logger]") {
     using sink_type = spdlog::sinks::daily_file_sink<std::mutex, spdlog::sinks::daily_filename_calculator>;
@@ -38,7 +27,7 @@ TEST_CASE("daily_logger with dateonly calculator", "[daily_logger]") {
     }
     logger->flush();
 
-    require_message_count(filename_buf_to_utf8string(w), 10);
+    require_message_count(SPDLOG_BUF_TO_STRING(w), 10);
 }
 
 struct custom_daily_file_name_calculator {
@@ -69,7 +58,7 @@ TEST_CASE("daily_logger with custom calculator", "[daily_logger]") {
     }
 
     logger->flush();
-    require_message_count(filename_buf_to_utf8string(w), 10);
+    require_message_count(SPDLOG_BUF_TO_STRING(w), 10);
 }
 
 /*

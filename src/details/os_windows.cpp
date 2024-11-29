@@ -31,11 +31,6 @@
     #include <share.h>
 #endif
 
-#if defined(SPDLOG_WCHAR_FILENAMES)
-    #include <cassert>
-    #include <limits>
-#endif
-
 #include <direct.h>  // for _mkdir/_wmkdir
 
 // clang-format on
@@ -67,11 +62,7 @@ std::tm gmtime() noexcept {
 }
 
 bool fopen_s(FILE **fp, const filename_t &filename, const filename_t &mode) {
-#ifdef SPDLOG_WCHAR_FILENAMES
-    *fp = ::_wfsopen((filename.c_str()), mode.c_str(), _SH_DENYNO);
-#else
     *fp = ::_fsopen((filename.c_str()), mode.c_str(), _SH_DENYNO);
-#endif
 #if defined(SPDLOG_PREVENT_CHILD_FD)
     if (*fp != nullptr) {
         auto file_handle = reinterpret_cast<HANDLE>(_get_osfhandle(::_fileno(*fp)));
@@ -85,31 +76,19 @@ bool fopen_s(FILE **fp, const filename_t &filename, const filename_t &mode) {
 }
 
 int remove(const filename_t &filename) noexcept {
-#if defined(SPDLOG_WCHAR_FILENAMES)
-    return ::_wremove(filename.c_str());
-#else
     return std::remove(filename.c_str());
-#endif
 }
 
 int remove_if_exists(const filename_t &filename) noexcept { return path_exists(filename) ? remove(filename) : 0; }
 
 int rename(const filename_t &filename1, const filename_t &filename2) noexcept {
-#if defined(SPDLOG_WCHAR_FILENAMES)
-    return ::_wrename(filename1.c_str(), filename2.c_str());
-#else
     return std::rename(filename1.c_str(), filename2.c_str());
-#endif
 }
 
 // Return true if path exists (file or directory)
 bool path_exists(const filename_t &filename) noexcept {
     struct _stat buffer;
-#ifdef SPDLOG_WCHAR_FILENAMES
-    return (::_wstat(filename.c_str(), &buffer) == 0);
-#else
     return (::_stat(filename.c_str(), &buffer) == 0);
-#endif
 }
 
 #ifdef _MSC_VER
@@ -180,16 +159,7 @@ size_t thread_id() noexcept {
 // See https://github.com/gabime/spdlog/issues/609
 void sleep_for_millis(unsigned int milliseconds) noexcept { ::Sleep(milliseconds); }
 
-// wchar support for windows file names (SPDLOG_WCHAR_FILENAMES must be defined)
-#if defined(SPDLOG_WCHAR_FILENAMES)
-std::string filename_to_str(const filename_t &filename) {
-    memory_buf_t buf;
-    wstr_to_utf8buf(filename, buf);
-    return SPDLOG_BUF_TO_STRING(buf);
-}
-#else
 std::string filename_to_str(const filename_t &filename) { return filename; }
-#endif
 
 int pid() noexcept { return static_cast<int>(::GetCurrentProcessId()); }
 
@@ -197,72 +167,9 @@ bool is_color_terminal() noexcept { return true; }
 
 // Determine if the terminal attached
 bool in_terminal(FILE *file) noexcept { return ::_isatty(_fileno(file)) != 0; }
-
-#if defined(SPDLOG_WCHAR_FILENAMES)
-void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target) {
-    if (wstr.size() > static_cast<size_t>((std::numeric_limits<int>::max)()) / 4 - 1) {
-        throw_spdlog_ex("UTF-16 string is too big to be converted to UTF-8");
-    }
-
-    int wstr_size = static_cast<int>(wstr.size());
-    if (wstr_size == 0) {
-        target.resize(0);
-        return;
-    }
-
-    int result_size = static_cast<int>(target.capacity());
-    if ((wstr_size + 1) * 4 > result_size) {
-        result_size = ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, NULL, 0, NULL, NULL);
-    }
-
-    if (result_size > 0) {
-        target.resize(result_size);
-        result_size = ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, target.data(), result_size, NULL, NULL);
-
-        if (result_size > 0) {
-            target.resize(result_size);
-            return;
-        }
-    }
-
-    throw_spdlog_ex(fmt_lib::format("WideCharToMultiByte failed. Last error: {}", ::GetLastError()));
-}
-
-void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
-    if (str.size() > static_cast<size_t>((std::numeric_limits<int>::max)()) - 1) {
-        throw_spdlog_ex("UTF-8 string is too big to be converted to UTF-16");
-    }
-
-    int str_size = static_cast<int>(str.size());
-    if (str_size == 0) {
-        target.resize(0);
-        return;
-    }
-
-    // find the size to allocate for the result buffer
-    int result_size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str_size, NULL, 0);
-
-    if (result_size > 0) {
-        target.resize(result_size);
-        result_size = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str.data(), str_size, target.data(), result_size);
-        if (result_size > 0) {
-            assert(result_size == target.size());
-            return;
-        }
-    }
-
-    throw_spdlog_ex(fmt_lib::format("MultiByteToWideChar failed. Last error: {}", ::GetLastError()));
-}
-#endif  // defined(SPDLOG_WCHAR_FILENAMES)
-
 // return true on success
 static bool mkdir_(const filename_t &path) {
-#
-#ifdef SPDLOG_WCHAR_FILENAMES
-    return ::_wmkdir(path.c_str()) == 0;
-#else
     return ::_mkdir(path.c_str()) == 0;
-#endif
 }
 
 // create the given directory - and all directories leading to it

@@ -78,13 +78,6 @@ option(SPDLOG_INSTALL "Generate the install target" ${SPDLOG_MASTER_PROJECT})
 option(SPDLOG_FMT_EXTERNAL "Use external fmt library instead of of fetching from gitub." OFF)
 option(SPDLOG_NO_EXCEPTIONS "Compile with -fno-exceptions. Call abort() on any spdlog exceptions" OFF)
 
-# misc tweakme options
-if(WIN32)
-    option(SPDLOG_WCHAR_FILENAMES "Support wchar filenames" OFF)
-else()
-    set(SPDLOG_WCHAR_FILENAMES OFF CACHE BOOL "non supported option" FORCE)
-endif()
-
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     option(SPDLOG_CLOCK_COARSE "Use CLOCK_REALTIME_COARSE instead of the regular clock," OFF)
 else()

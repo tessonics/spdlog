@@ -39,9 +39,6 @@
 
 #define SPDLOG_FMT_RUNTIME(format_string) fmt::runtime(format_string)
 #define SPDLOG_FMT_STRING(format_string) FMT_STRING(format_string)
-#if defined(SPDLOG_WCHAR_FILENAMES)
-    #include "fmt/xchar.h"
-#endif
 
 #ifndef SPDLOG_FUNCTION
     #define SPDLOG_FUNCTION static_cast<const char *>(__FUNCTION__)
@@ -71,15 +68,8 @@ namespace sinks {
 class sink;
 }
 
-#if defined(_WIN32) && defined(SPDLOG_WCHAR_FILENAMES)
-using filename_t = std::wstring;
-// allow macro expansion to occur in SPDLOG_FILENAME_T
-    #define SPDLOG_FILENAME_T_INNER(s) L##s
-    #define SPDLOG_FILENAME_T(s) SPDLOG_FILENAME_T_INNER(s)
-#else
 using filename_t = std::string;
-    #define SPDLOG_FILENAME_T(s) s
-#endif
+#define SPDLOG_FILENAME_T(s) s
 
 using log_clock = std::chrono::system_clock;
 using sink_ptr = std::shared_ptr<sinks::sink>;
@@ -198,14 +188,6 @@ namespace details {
 }
 
 [[nodiscard]] constexpr spdlog::string_view_t to_string_view(spdlog::string_view_t str) noexcept { return str; }
-
-#if defined(SPDLOG_WCHAR_FILENAMES)
-[[nodiscard]] constexpr spdlog::wstring_view_t to_string_view(const wmemory_buf_t &buf) noexcept {
-    return spdlog::wstring_view_t{buf.data(), buf.size()};
-}
-
-[[nodiscard]] constexpr spdlog::wstring_view_t to_string_view(spdlog::wstring_view_t str) noexcept { return str; }
-#endif
 
 template <typename T, typename... Args>
 [[nodiscard]] constexpr fmt::basic_string_view<T> to_string_view(fmt::basic_format_string<T, Args...> fmt) noexcept {
