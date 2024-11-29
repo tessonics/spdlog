@@ -167,6 +167,69 @@ bool is_color_terminal() noexcept { return true; }
 
 // Determine if the terminal attached
 bool in_terminal(FILE *file) noexcept { return ::_isatty(_fileno(file)) != 0; }
+
+
+void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target) {
+    if (wstr.size() > static_cast<size_t>((std::numeric_limits<int>::max)()) / 4 - 1) {
+        throw_spdlog_ex("UTF-16 string is too big to be converted to UTF-8");
+    }
+
+    int wstr_size = static_cast<int>(wstr.size());
+    if (wstr_size == 0) {
+        target.resize(0);
+        return;
+    }
+
+    int result_size = static_cast<int>(target.capacity());
+    if ((wstr_size + 1) * 4 > result_size) {
+        result_size =
+            ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, NULL, 0, NULL, NULL);
+    }
+
+    if (result_size > 0) {
+        target.resize(result_size);
+        result_size = ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, target.data(),
+                                            result_size, NULL, NULL);
+
+        if (result_size > 0) {
+            target.resize(result_size);
+            return;
+        }
+    }
+
+    throw_spdlog_ex(
+        fmt_lib::format("WideCharToMultiByte failed. Last error: {}", ::GetLastError()));
+}
+
+void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
+    if (str.size() > static_cast<size_t>((std::numeric_limits<int>::max)()) - 1) {
+        throw_spdlog_ex("UTF-8 string is too big to be converted to UTF-16");
+    }
+
+    int str_size = static_cast<int>(str.size());
+    if (str_size == 0) {
+        target.resize(0);
+        return;
+    }
+
+    // find the size to allocate for the result buffer
+    int result_size =
+        ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, NULL, 0);
+
+    if (result_size > 0) {
+        target.resize(result_size);
+        result_size = ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, target.data(),
+                                            result_size);
+        if (result_size > 0) {
+            assert(result_size == target.size());
+            return;
+        }
+    }
+
+    throw_spdlog_ex(
+        fmt_lib::format("MultiByteToWideChar failed. Last error: {}", ::GetLastError()));
+}
+
 // return true on success
 static bool mkdir_(const filename_t &path) {
     return ::_mkdir(path.c_str()) == 0;
