@@ -133,10 +133,6 @@ using wmemory_buf_t = fmt::basic_memory_buffer<wchar_t, 250>;
     #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
 #endif
 
-// Is convertable to string_view_t ?
-template <typename T>
-using is_convertible_to_sv = std::enable_if_t<std::is_convertible_v<T, string_view_t>>;
-
 // Log level enum
 enum class level {
     trace = SPDLOG_LEVEL_TRACE,
