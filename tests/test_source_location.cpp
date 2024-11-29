@@ -19,6 +19,3 @@ TEST_CASE("test_source_location", "[source_location]") {
     REQUIRE(test_sink->lines().size() == 2);
     REQUIRE(test_sink->lines()[1] == "test_source_location.cpp:18 Hello");
 }
-
-
-//REQUIRE(oss.str() == std::string("test_source_location.cpp:20 Hello source location") + default_eol);
