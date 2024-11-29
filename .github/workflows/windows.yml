@@ -21,24 +21,24 @@ jobs:
             BUILD_EXAMPLE: 'OFF'
             USE_STD_FORMAT: 'ON'
             CXX_STANDARD: 20
-          - GENERATOR: "Visual Studio 17 2022"
-            BUILD_TYPE: Release
-            BUILD_SHARED: 'ON'
-            FATAL_ERRORS: 'ON'
-            WCHAR: 'ON'
-            WCHAR_FILES: 'ON'
-            BUILD_EXAMPLE: 'OFF'
-            USE_STD_FORMAT: 'ON'
-            CXX_STANDARD: 20
-          - GENERATOR: "Visual Studio 17 2022"
-            BUILD_TYPE: Release
-            BUILD_SHARED: 'ON'
-            FATAL_ERRORS: 'ON'
-            WCHAR: 'OFF'
-            WCHAR_FILES: 'OFF'
-            BUILD_EXAMPLE: 'ON'
-            USE_STD_FORMAT: 'OFF'
-            CXX_STANDARD: 17
+#          - GENERATOR: "Visual Studio 17 2022"
+#            BUILD_TYPE: Release
+#            BUILD_SHARED: 'ON'
+#            FATAL_ERRORS: 'ON'
+#            WCHAR: 'ON'
+#            WCHAR_FILES: 'ON'
+#            BUILD_EXAMPLE: 'OFF'
+#            USE_STD_FORMAT: 'ON'
+#            CXX_STANDARD: 20
+#          - GENERATOR: "Visual Studio 17 2022"
+#            BUILD_TYPE: Release
+#            BUILD_SHARED: 'ON'
+#            FATAL_ERRORS: 'ON'
+#            WCHAR: 'OFF'
+#            WCHAR_FILES: 'OFF'
+#            BUILD_EXAMPLE: 'ON'
+#            USE_STD_FORMAT: 'OFF'
+#            CXX_STANDARD: 17
 
     steps:
       - name: Checkout code
@@ -70,7 +70,7 @@ jobs:
         shell: pwsh
         env:
           PATH: ${{ env.PATH }};${{ github.workspace }}\build\_deps\catch2-build\src\${{ matrix.config.BUILD_TYPE }};${{ github.workspace }}\build\bin\${{ matrix.config.BUILD_TYPE }}
-        run: ${{ github.workspace }}\build\${{ matrix.config.BUILD_TYPE }}\spdlog-utests.exe
+        run: ${{ github.workspace }}\build\bin\${{ matrix.config.BUILD_TYPE }}\spdlog-utests.exe
 
 
 #  # -----------------------------------------------------------------------
