@@ -95,28 +95,28 @@ using sink_ptr = std::shared_ptr<sinks::sink>;
 using sinks_init_list = std::initializer_list<sink_ptr>;
 using err_handler = std::function<void(const std::string &err_msg)>;
 
+using string_view_t = std::basic_string_view<char>;
+using wstring_view_t = std::basic_string_view<wchar_t>;
+
 #ifdef SPDLOG_USE_STD_FORMAT
 namespace fmt_lib = std;
-using string_view_t = std::string_view;
 using memory_buf_t = std::string;
-using wstring_view_t = std::wstring_view;
 using wmemory_buf_t = std::wstring;
 
 template <typename... Args>
     #if __cpp_lib_format >= 202207L
-using format_string_t = std::format_string<Args...>;
+        using format_string_t = std::format_string<Args...>;
     #else
-using format_string_t = std::string_view;
+        using format_string_t = std::string_view;
     #endif
 
     #define SPDLOG_BUF_TO_STRING(x) x
 #else  // use fmt lib instead of std::format
 namespace fmt_lib = fmt;
-using string_view_t = fmt::basic_string_view<char>;
+
 using memory_buf_t = fmt::basic_memory_buffer<char, 250>;
 template <typename... Args>
 using format_string_t = fmt::format_string<Args...>;
-using wstring_view_t = fmt::basic_string_view<wchar_t>;
 using wmemory_buf_t = fmt::basic_memory_buffer<wchar_t, 250>;
     #define SPDLOG_BUF_TO_STRING(x) fmt::to_string(x)
 #endif  // SPDLOG_USE_STD_FORMAT

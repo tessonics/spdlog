@@ -192,7 +192,7 @@ protected:
     // common implementation for after templated public api has been resolved to format string and
     // args
     template <typename... Args>
-    void log_with_format_(source_loc loc, level lvl, string_view_t fmt, Args &&...args) {
+    void log_with_format_(source_loc loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
         assert(should_log(lvl));
         SPDLOG_TRY {
 #ifdef SPDLOG_USE_STD_FORMAT
