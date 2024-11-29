@@ -81,7 +81,7 @@ void logger::flush_() {
     }
 }
 
-bool logger::should_flush_(const details::log_msg &msg) {
+bool logger::should_flush_(const details::log_msg &msg) const {
     auto flush_level = flush_level_.load(std::memory_order_relaxed);
     return (msg.log_level >= flush_level) && (msg.log_level != level::off);
 }
