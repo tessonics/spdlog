@@ -8,14 +8,6 @@
     #include <version>
 #endif
 
-#if __cpp_lib_source_location >= 201907
-    #include <source_location>
-    #define SPDLOG_HAVE_STD_SOURCE_LOCATION
-#elif __has_include(<experimental/source_location>)
-    #include <experimental/source_location>
-    #define SPDLOG_HAVE_EXPERIMENTAL_SOURCE_LOCATION
-#endif
-
 namespace spdlog {
 // source location - either initiated from std::source_location or from
 // std::experimental::source_location or empty
