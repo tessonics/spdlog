@@ -78,8 +78,11 @@ TEST_CASE("dir_name", "[create_dir]") {
     //
     // test windows cases when drive letter is given e.g. C:\\some-folder
     //
-    #include <fileapi.h>
+    // clang-format off
     #include <windows.h>
+    #include <fileapi.h>
+    // clang-format on
+
 
 std::string get_full_path(const std::string &relative_folder_path) {
     char full_path[MAX_PATH];
