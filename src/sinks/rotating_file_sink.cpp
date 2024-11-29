@@ -61,6 +61,11 @@ filename_t rotating_file_sink<Mutex>::filename() {
 }
 
 template <typename Mutex>
+void rotating_file_sink<Mutex>::rotate_now() {
+    rotate_();
+}
+
+template <typename Mutex>
 void rotating_file_sink<Mutex>::sink_it_(const details::log_msg &msg) {
     memory_buf_t formatted;
     base_sink<Mutex>::formatter_->format(msg, formatted);
