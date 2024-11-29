@@ -4,10 +4,6 @@
 #pragma once
 #include <cstdint>
 
-#if __has_include(<version>)
-    #include <version>
-#endif
-
 namespace spdlog {
 // source location - either initiated from std::source_location or from
 // std::experimental::source_location or empty
