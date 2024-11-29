@@ -6,17 +6,7 @@
 //
 // bench.cpp : spdlog benchmarks
 //
-#include "spdlog/sinks/basic_file_sink.h"
-#include "spdlog/sinks/daily_file_sink.h"
-#include "spdlog/sinks/null_sink.h"
-#include "spdlog/sinks/rotating_file_sink.h"
-#include "spdlog/spdlog.h"
-
-#if defined(SPDLOG_USE_STD_FORMAT)
-    #include <format>
-#else
-    #include <fmt/format.h>
-#endif
+#include <fmt/format.h>
 
 #include <atomic>
 #include <cstdlib>  // EXIT_FAILURE
@@ -24,6 +14,11 @@
 #include <string>
 #include <thread>
 
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/daily_file_sink.h"
+#include "spdlog/sinks/null_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/spdlog.h"
 #include "utils.h"
 
 void bench(int howmany, std::shared_ptr<spdlog::logger> log);

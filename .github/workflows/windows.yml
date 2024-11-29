@@ -57,7 +57,6 @@ jobs:
             -D SPDLOG_BUILD_EXAMPLE=${{ matrix.config.BUILD_EXAMPLE }} `
             -D SPDLOG_BUILD_TESTS=ON `
             -D SPDLOG_BUILD_WARNINGS=${{ matrix.config.FATAL_ERRORS }} `
-            -D SPDLOG_USE_STD_FORMAT=${{ matrix.config.USE_STD_FORMAT }} `
             -D CMAKE_CXX_STANDARD=${{ matrix.config.CXX_STANDARD }} ..
 
       - name: Build
@@ -118,7 +117,6 @@ jobs:
             -D SPDLOG_BUILD_EXAMPLE=${{ matrix.config.BUILD_EXAMPLE }} `
             -D SPDLOG_BUILD_TESTS=ON `
             -D SPDLOG_BUILD_WARNINGS=${{ matrix.config.FATAL_ERRORS }} `
-            -D SPDLOG_USE_STD_FORMAT=${{ matrix.config.USE_STD_FORMAT }} `
             -D CMAKE_CXX_STANDARD=${{ matrix.config.CXX_STANDARD }} ..
 
       - name: Build
