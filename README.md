@@ -56,7 +56,6 @@ see example [CMakeLists.txt](https://github.com/gabime/spdlog/blob/v2.x/example/
   * Easily [extendable](https://github.com/gabime/spdlog/wiki/4.-Sinks#implementing-your-own-sink) with custom log targets.
 * Log filtering - log levels can be modified at runtime as well as compile time.
 * Support for loading log levels from argv or environment var.
-* [Backtrace](#backtrace-support) support - store debug messages in a ring buffer and display them later on demand.
 
 ## Usage samples
 
