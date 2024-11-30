@@ -283,6 +283,7 @@ public:
         dest.append(some_txt.data(), some_txt.data() + some_txt.size());
     }
 
+    [[nodiscard]]
     std::unique_ptr<custom_flag_formatter> clone() const override { return std::make_unique<my_formatter_flag>(); }
 };
 
