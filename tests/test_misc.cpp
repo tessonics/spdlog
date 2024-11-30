@@ -1,3 +1,7 @@
+#ifdef _WIN32 // to prevent fopen warning on windows
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <cstdio>
 #include <cstring>
 #include "includes.h"
@@ -186,7 +190,7 @@ struct auto_closer {
     auto_closer(const auto_closer&) = delete;
     auto_closer& operator=(const auto_closer&) = delete;
     ~auto_closer() {
-        fp != nullptr && (std::fclose(fp) != 0);
+        if (fp != nullptr) (void)std::fclose(fp);
     }
 };
 
@@ -198,6 +202,7 @@ TEST_CASE("os::fwrite_bytes", "[os]") {
     {
         auto_closer closer(std::fopen(filename, "wb"));
         REQUIRE(closer.fp != nullptr);
+        std::ofstream ofstream(filename, std::ios::binary);
         REQUIRE(fwrite_bytes(msg, std::strlen(msg), closer.fp) == true);
         REQUIRE(fwrite_bytes(msg, 0, closer.fp) == true);
         std::fflush(closer.fp);
