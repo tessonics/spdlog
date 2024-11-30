@@ -32,7 +32,7 @@ public:
 
     void set_color(level color_level, string_view_t color);
     void set_color_mode(color_mode mode);
-    bool should_color();
+    bool should_color() const;
 
     // Formatting codes
     static constexpr std::string_view reset = "\033[m";

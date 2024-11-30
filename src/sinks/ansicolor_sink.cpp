@@ -34,7 +34,7 @@ void ansicolor_sink<Mutex>::set_color(level color_level, string_view_t color) {
 }
 
 template <typename Mutex>
-bool ansicolor_sink<Mutex>::should_color() {
+bool ansicolor_sink<Mutex>::should_color() const {
     return should_do_colors_;
 }
 

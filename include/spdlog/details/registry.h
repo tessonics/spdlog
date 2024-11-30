@@ -45,7 +45,7 @@ public:
     // This make the default API faster, but cannot be used concurrently with set_default_logger().
     // e.g do not call set_default_logger() from one thread while calling spdlog::info() from
     // another.
-    logger *get_default_raw();
+    logger *get_default_raw() const;
 
     // set default logger.
     // default logger is stored in default_logger_ (for faster retrieval) and in the loggers_ map.

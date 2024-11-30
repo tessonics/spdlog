@@ -25,10 +25,10 @@ public:
 
     void open(const filename_t &fname, bool truncate = false);
     void reopen(bool truncate);
-    void flush();
-    void sync();
+    void flush() const;
+    void sync() const;
     void close();
-    void write(const memory_buf_t &buf);
+    void write(const memory_buf_t &buf) const;
     size_t size() const;
     const filename_t &filename() const;
 
