@@ -75,7 +75,7 @@ std::shared_ptr<logger> logger::clone(std::string logger_name) {
 // private/protected methods
 void logger::flush_() {
     for (auto &sink : sinks_) {
-        SPDLOG_TRY { sink->flush(); }
+        try { sink->flush(); }
         SPDLOG_LOGGER_CATCH(source_loc())
     }
 }

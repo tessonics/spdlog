@@ -15,12 +15,13 @@ log_msg::log_msg(spdlog::log_clock::time_point log_time,
                  spdlog::string_view_t msg)
     : logger_name(a_logger_name),
       log_level(lvl),
-      time(log_time)
-#ifndef SPDLOG_NO_THREAD_ID
-      ,
-      thread_id(os::thread_id())
+      time(log_time),
+
+#ifdef SPDLOG_NO_THREAD_ID
+    thread_id(0),
+#else
+    thread_id(os::thread_id()),
 #endif
-      ,
       source(loc),
       payload(msg) {
 }

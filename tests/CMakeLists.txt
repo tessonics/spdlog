@@ -53,14 +53,11 @@ set(SPDLOG_UTESTS_SOURCES
     test_no_source_location.cpp
     test_log_level.cpp
     test_include_sinks.cpp
-    test_bin_to_hex.cpp)
+    test_bin_to_hex.cpp
+    test_errors.cpp)
 
 if(WIN32)
     list(APPEND SPDLOG_UTESTS_SOURCES test_eventlog.cpp)
-endif()
-
-if(NOT SPDLOG_NO_EXCEPTIONS)
-    list(APPEND SPDLOG_UTESTS_SOURCES test_errors.cpp)
 endif()
 
 if(systemd_FOUND)

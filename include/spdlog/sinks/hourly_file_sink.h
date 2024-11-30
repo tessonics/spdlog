@@ -146,7 +146,7 @@ private:
             bool ok = remove_if_exists(old_filename) == 0;
             if (!ok) {
                 filenames_q_.push_back(std::move(current_file));
-                SPDLOG_THROW(spdlog_ex("Failed removing hourly file " + filename_to_str(old_filename), errno));
+                throw(spdlog_ex("Failed removing hourly file " + filename_to_str(old_filename), errno));
             }
         }
         filenames_q_.push_back(std::move(current_file));

@@ -5,5 +5,4 @@
 
 #pragma once
 
-#include "../spdlog_config.h"
 #include "fmt/format.h"

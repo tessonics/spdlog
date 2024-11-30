@@ -22,22 +22,20 @@
 #include "./details/log_msg.h"
 #include "./sinks/sink.h"
 
-#ifndef SPDLOG_NO_EXCEPTIONS
-    #define SPDLOG_LOGGER_CATCH(location)                                                                                     \
-        catch (const std::exception &ex) {                                                                                    \
-            if (!location.empty()) {                                                                                          \
-                err_handler_(fmt_lib::format(SPDLOG_FMT_STRING("{} [{}({})]"), ex.what(), location.filename, location.line)); \
-            } else {                                                                                                          \
-                err_handler_(ex.what());                                                                                      \
-            }                                                                                                                 \
-        }                                                                                                                     \
-        catch (...) {                                                                                                         \
-            err_handler_("Rethrowing unknown exception in logger");                                                           \
-            throw;                                                                                                            \
-        }
-#else
-    #define SPDLOG_LOGGER_CATCH(location)
-#endif
+
+#define SPDLOG_LOGGER_CATCH(location)                                                                                     \
+    catch (const std::exception &ex) {                                                                                    \
+        if (!location.empty()) {                                                                                          \
+            err_handler_(fmt_lib::format(SPDLOG_FMT_STRING("{} [{}({})]"), ex.what(), location.filename, location.line)); \
+        } else {                                                                                                          \
+            err_handler_(ex.what());                                                                                      \
+        }                                                                                                                 \
+    }                                                                                                                     \
+    catch (...) {                                                                                                         \
+        err_handler_("Rethrowing unknown exception in logger");                                                           \
+        throw;                                                                                                            \
+    }
+
 
 namespace spdlog {
 
@@ -186,7 +184,7 @@ protected:
     template <typename... Args>
     void log_with_format_(source_loc loc, const level lvl, const format_string_t<Args...> &format_string, Args &&...args) {
         assert(should_log(lvl));
-        SPDLOG_TRY {
+        try {
             memory_buf_t buf;
             fmt::vformat_to(std::back_inserter(buf), format_string, fmt::make_format_args(args...));
             sink_it_(details::log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size())));
@@ -199,7 +197,7 @@ protected:
         assert(should_log(msg.log_level));
         for (auto &sink : sinks_) {
             if (sink->should_log(msg.log_level)) {
-                SPDLOG_TRY { sink->log(msg); }
+                try { sink->log(msg); }
                 SPDLOG_LOGGER_CATCH(msg.source)
             }
         }

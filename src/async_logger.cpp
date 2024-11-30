@@ -23,7 +23,7 @@ spdlog::async_logger::async_logger(std::string logger_name,
 
 // send the log message to the thread pool
 void spdlog::async_logger::sink_it_(const details::log_msg &msg) {
-    SPDLOG_TRY {
+    try {
         if (auto pool_ptr = thread_pool_.lock()) {
             pool_ptr->post_log(shared_from_this(), msg, overflow_policy_);
         } else {
@@ -35,7 +35,7 @@ void spdlog::async_logger::sink_it_(const details::log_msg &msg) {
 
 // send flush request to the thread pool
 void spdlog::async_logger::flush_() {
-    SPDLOG_TRY {
+    try {
         if (auto pool_ptr = thread_pool_.lock()) {
             pool_ptr->post_flush(shared_from_this(), overflow_policy_);
         } else {
@@ -51,7 +51,7 @@ void spdlog::async_logger::flush_() {
 void spdlog::async_logger::backend_sink_it_(const details::log_msg &msg) {
     for (auto &sink : sinks_) {
         if (sink->should_log(msg.log_level)) {
-            SPDLOG_TRY { sink->log(msg); }
+            try { sink->log(msg); }
             SPDLOG_LOGGER_CATCH(msg.source)
         }
     }
@@ -63,7 +63,7 @@ void spdlog::async_logger::backend_sink_it_(const details::log_msg &msg) {
 
 void spdlog::async_logger::backend_flush_() {
     for (auto &sink : sinks_) {
-        SPDLOG_TRY { sink->flush(); }
+        try { sink->flush(); }
         SPDLOG_LOGGER_CATCH(source_loc())
     }
 }

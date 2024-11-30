@@ -15,7 +15,7 @@
 #include <type_traits>
 
 #include "./source_loc.h"
-#include "./spdlog_config.h"
+
 
 #if defined(SPDLOG_SHARED_LIB)
     #if defined(_WIN32)
@@ -38,22 +38,6 @@
 
 #ifndef SPDLOG_FUNCTION
     #define SPDLOG_FUNCTION static_cast<const char *>(__FUNCTION__)
-#endif
-
-#ifdef SPDLOG_NO_EXCEPTIONS
-    #define SPDLOG_TRY
-    #define SPDLOG_THROW(ex)                               \
-        do {                                               \
-            printf("spdlog fatal error: %s\n", ex.what()); \
-            std::abort();                                  \
-        } while (0)
-    #define SPDLOG_CATCH_STD
-#else
-    #define SPDLOG_TRY try
-    #define SPDLOG_THROW(ex) throw(ex)
-    #define SPDLOG_CATCH_STD             \
-        catch (const std::exception &) { \
-        }
 #endif
 
 namespace spdlog {
@@ -106,11 +90,7 @@ enum class level {
     n_levels
 };
 
-#if defined(SPDLOG_NO_ATOMIC_LEVELS)
-using atomic_level_t = details::null_atomic<level>;
-#else
 using atomic_level_t = std::atomic<level>;
-#endif
 
 [[nodiscard]] constexpr size_t level_to_number(level lvl) noexcept { return static_cast<size_t>(lvl); }
 

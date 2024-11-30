@@ -76,7 +76,6 @@ option(SPDLOG_BUILD_WARNINGS "Enable compiler warnings" OFF)
 option(SPDLOG_SYSTEM_INCLUDES "Include as system headers (skip for clang-tidy)." OFF)
 option(SPDLOG_INSTALL "Generate the install target" ${SPDLOG_MASTER_PROJECT})
 option(SPDLOG_FMT_EXTERNAL "Use external fmt library instead of of fetching from gitub." OFF)
-option(SPDLOG_NO_EXCEPTIONS "Compile with -fno-exceptions. Call abort() on any spdlog exceptions" OFF)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     option(SPDLOG_CLOCK_COARSE "Use CLOCK_REALTIME_COARSE instead of the regular clock," OFF)
@@ -86,10 +85,6 @@ endif()
 
 option(SPDLOG_PREVENT_CHILD_FD "Prevent from child processes to inherit log file descriptors" OFF)
 option(SPDLOG_NO_THREAD_ID "prevent spdlog from querying the thread id on each log call if thread id is not needed" OFF)
-option(
-    SPDLOG_NO_ATOMIC_LEVELS
-    "prevent spdlog from using of std::atomic log levels (use only if your code never modifies log levels concurrently"
-    OFF)
 option(SPDLOG_DISABLE_DEFAULT_LOGGER "Disable default logger creation" OFF)
 
 # clang-tidy
@@ -246,14 +241,6 @@ if(HAVE_FWRITE_UNLOCKED)
 endif()
 
 # ---------------------------------------------------------------------------------------
-# Generate spdlog_config.h based on the current configuration
-# ---------------------------------------------------------------------------------------
-set(OUT_CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/spdlog/spdlog_config.h")
-message(STATUS "Generating ${OUT_CONFIG_FILE}")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog_config.h.in" ${OUT_CONFIG_FILE} @ONLY)
-list(APPEND SPDLOG_HEADERS ${OUT_CONFIG_FILE})
-
-# ---------------------------------------------------------------------------------------
 # spdlog library
 # ---------------------------------------------------------------------------------------
 if(BUILD_SHARED_LIBS)
@@ -307,17 +294,20 @@ if(ANDROID)
 endif()
 
 # ---------------------------------------------------------------------------------------
-# If exceptions are disabled, disable them in the bundled fmt as well
+# spdlog private defines according to the options
 # ---------------------------------------------------------------------------------------
-if(SPDLOG_NO_EXCEPTIONS)
-    # Add compile definition for the fmt target
-    target_compile_definitions(fmt PUBLIC FMT_EXCEPTIONS=0)
-    if(NOT MSVC)
-        target_compile_options(spdlog PRIVATE -fno-exceptions)
-    else()
-        target_compile_options(spdlog PRIVATE /EHs-c-)
+foreach(
+        SPDLOG_OPTION
+        SPDLOG_CLOCK_COARSE
+        SPDLOG_PREVENT_CHILD_FD
+        SPDLOG_NO_THREAD_ID
+        SPDLOG_DISABLE_DEFAULT_LOGGER
+        SPDLOG_FWRITE_UNLOCKED)
+    if(${SPDLOG_OPTION})
+        target_compile_definitions(spdlog PRIVATE ${SPDLOG_OPTION})
     endif()
-endif()
+endforeach()
+
 # ---------------------------------------------------------------------------------------
 # Build binaries
 # ---------------------------------------------------------------------------------------
@@ -394,8 +384,4 @@ if(SPDLOG_INSTALL)
     # Support creation of installable packages
     # ---------------------------------------------------------------------------------------
     include(cmake/spdlogCPack.cmake)
-
-    # Install spdlog_config.h file Assume your tweakme.h.in is located in the same directory as CMakeLists.txt
-    set(TWEAKME_IN "${CMAKE_CURRENT_SOURCE_DIR}/tweakme.h.in")
-    set(TWEAKME_OUT "${CMAKE_CURRENT_BINARY_DIR}/include/spdlog/tweakme.h")
 endif()
