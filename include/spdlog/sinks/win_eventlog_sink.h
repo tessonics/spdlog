@@ -107,7 +107,7 @@ public:
         sid_t result;
         result.buffer_.resize(sid_length);
         if (!::CopySid(sid_length, (PSID)result.as_sid(), psid)) {
-            SPDLOG_THROW(win32_error("CopySid"));
+            throw(win32_error("CopySid"));
         }
 
         return result;
@@ -123,7 +123,7 @@ public:
             HANDLE token_handle_ = INVALID_HANDLE_VALUE;
             explicit process_token_t(HANDLE process) {
                 if (!::OpenProcessToken(process, TOKEN_QUERY, &token_handle_)) {
-                    SPDLOG_THROW(win32_error("OpenProcessToken"));
+                    throw(win32_error("OpenProcessToken"));
                 }
             }
 
@@ -135,13 +135,13 @@ public:
         // the token size
         DWORD tusize = 0;
         if (::GetTokenInformation(current_process_token.token_handle_, TokenUser, NULL, 0, &tusize)) {
-            SPDLOG_THROW(win32_error("GetTokenInformation should fail"));
+            throw(win32_error("GetTokenInformation should fail"));
         }
 
         // get user token
         std::vector<unsigned char> buffer(static_cast<size_t>(tusize));
         if (!::GetTokenInformation(current_process_token.token_handle_, TokenUser, (LPVOID)buffer.data(), tusize, &tusize)) {
-            SPDLOG_THROW(win32_error("GetTokenInformation"));
+            throw(win32_error("GetTokenInformation"));
         }
 
         // create a wrapper of the SID data as stored in the user token
@@ -192,7 +192,7 @@ private:
         if (!hEventLog_) {
             hEventLog_ = ::RegisterEventSourceA(nullptr, source_.c_str());
             if (!hEventLog_ || hEventLog_ == (HANDLE)ERROR_ACCESS_DENIED) {
-                SPDLOG_THROW(internal::win32_error("RegisterEventSource"));
+                throw(internal::win32_error("RegisterEventSource"));
             }
         }
 
@@ -214,7 +214,7 @@ protected:
                                              event_id_, current_user_sid_.as_sid(), 1, 0, &lp_str, nullptr));
 
         if (!succeeded) {
-            SPDLOG_THROW(win32_error("ReportEvent"));
+            throw(win32_error("ReportEvent"));
         }
     }
 
