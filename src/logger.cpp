@@ -40,9 +40,8 @@ void logger::set_formatter(std::unique_ptr<formatter> f) {
             // last element - we can move it.
             (*it)->set_formatter(std::move(f));
             break;  // to prevent clang-tidy warning
-        } else {
-            (*it)->set_formatter(f->clone());
         }
+        (*it)->set_formatter(f->clone());
     }
 }
 

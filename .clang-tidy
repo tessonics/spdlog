@@ -23,7 +23,8 @@ clang-analyzer-*,
 -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
 -readability-named-parameter,
 -cert-env33-c,
--modernize-concat-nested-namespaces
+-modernize-concat-nested-namespaces,
+-cppcoreguidelines-owning-memory
 '
 
 

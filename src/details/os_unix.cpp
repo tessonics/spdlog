@@ -109,7 +109,7 @@ int rename(const filename_t &filename1, const filename_t &filename2) noexcept {
 
 // Return true if path exists (file or directory)
 bool path_exists(const filename_t &filename) noexcept {
-    struct stat buffer;
+    struct stat buffer{};
     return (::stat(filename.c_str(), &buffer) == 0);
 }
 
@@ -127,7 +127,7 @@ size_t filesize(FILE *f) {
 #endif
     // 64 bits(but not in osx, linux/musl or cygwin, where fstat64 is deprecated)
 #if ((defined(__linux__) && defined(__GLIBC__)) || defined(__sun) || defined(_AIX)) && (defined(__LP64__) || defined(_LP64))
-    struct stat64 st;
+    struct stat64 st{};
     if (::fstat64(fd, &st) == 0) {
         return static_cast<size_t>(st.st_size);
     }
@@ -275,7 +275,7 @@ bool is_color_terminal() noexcept {
 bool in_terminal(FILE *file) noexcept { return ::isatty(fileno(file)) != 0; }
 
 // return true on success
-static bool mkdir_(const filename_t &path) { return ::mkdir(path.c_str(), mode_t(0755)) == 0; }
+static bool mkdir_(const filename_t &path) { return ::mkdir(path.c_str(), static_cast<mode_t>(0755)) == 0; }
 
 // create the given directory - and all directories leading to it
 // return true on success or if the directory already exists

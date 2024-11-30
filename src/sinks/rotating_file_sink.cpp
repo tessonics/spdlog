@@ -45,11 +45,12 @@ rotating_file_sink<Mutex>::rotating_file_sink(filename_t base_filename,
 // e.g. calc_filename("logs/mylog.txt, 3) => "logs/mylog.3.txt".
 template <typename Mutex>
 filename_t rotating_file_sink<Mutex>::calc_filename(const filename_t &filename, std::size_t index) {
-    if (index == 0u) {
+    if (index == 0U) {
         return filename;
     }
 
-    filename_t basename, ext;
+    filename_t basename;
+    filename_t ext;
     std::tie(basename, ext) = details::file_helper::split_by_extension(filename);
     return fmt_lib::format(SPDLOG_FMT_STRING(SPDLOG_FILENAME_T("{}.{}{}")), basename, index, ext);
 }

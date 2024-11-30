@@ -5,6 +5,7 @@
 
 #include <cerrno>
 #include <cstdio>
+#include <utility>
 
 #include "spdlog/common.h"
 #include "spdlog/details/os.h"
@@ -12,8 +13,8 @@
 namespace spdlog {
 namespace details {
 
-file_helper::file_helper(const file_event_handlers &event_handlers)
-    : event_handlers_(event_handlers) {}
+file_helper::file_helper(file_event_handlers event_handlers)
+    : event_handlers_(std::move(event_handlers)) {}
 
 file_helper::~file_helper() { close(); }
 

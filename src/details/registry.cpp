@@ -80,10 +80,9 @@ std::shared_ptr<logger> registry::get(const std::string &logger_name) {
             }
         }
         return nullptr;
-    } else {
-        auto found = loggers_.find(logger_name);
-        return found == loggers_.end() ? nullptr : found->second;
     }
+    auto found = loggers_.find(logger_name);
+    return found == loggers_.end() ? nullptr : found->second;
 }
 
 // if the map is small do a sequential search and avoid creating string for find(logger_name)
@@ -99,10 +98,8 @@ std::shared_ptr<logger> registry::get(std::string_view logger_name) {
         return nullptr;
     }
     // otherwise use the normal map lookup
-    else {
-        auto found = loggers_.find(std::string(logger_name));
-        return found == loggers_.end() ? nullptr : found->second;
-    }
+    const auto found = loggers_.find(std::string(logger_name));
+    return found == loggers_.end() ? nullptr : found->second;
 }
 
 std::shared_ptr<logger> registry::get(const char *logger_name) { return get(std::string_view(logger_name)); }

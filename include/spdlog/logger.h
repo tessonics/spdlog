@@ -184,11 +184,11 @@ protected:
     // common implementation for after templated public api has been resolved to format string and
     // args
     template <typename... Args>
-    void log_with_format_(source_loc loc, level lvl, const format_string_t<Args...> &fmt, Args &&...args) {
+    void log_with_format_(source_loc loc, const level lvl, const format_string_t<Args...> &format_string, Args &&...args) {
         assert(should_log(lvl));
         SPDLOG_TRY {
             memory_buf_t buf;
-            fmt::vformat_to(std::back_inserter(buf), fmt, fmt::make_format_args(args...));
+            fmt::vformat_to(std::back_inserter(buf), format_string, fmt::make_format_args(args...));
             sink_it_(details::log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size())));
         }
         SPDLOG_LOGGER_CATCH(loc)

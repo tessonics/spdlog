@@ -46,6 +46,9 @@ public:
         }
     }
 
+    scoped_padder(const scoped_padder &) = delete;
+    scoped_padder &operator=(const scoped_padder &) = delete;
+
     template <typename T>
     static unsigned int count_digits(T n) {
         return fmt_helper::count_digits(n);
@@ -127,7 +130,7 @@ static const char *ampm(const tm &t) { return t.tm_hour >= 12 ? "PM" : "AM"; }
 static int to12h(const tm &t) { return t.tm_hour > 12 ? t.tm_hour - 12 : t.tm_hour; }
 
 // Abbreviated weekday name
-static std::array<const char *, 7> days{{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}};
+static constexpr std::array<const char *, 7> days{{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}};
 
 template <typename ScopedPadder>
 class a_formatter final : public flag_formatter {
@@ -135,15 +138,15 @@ public:
     explicit a_formatter(padding_info padinfo)
         : flag_formatter(padinfo) {}
 
-    void format(const details::log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
-        string_view_t field_value{days[static_cast<size_t>(tm_time.tm_wday)]};
+    void format(const log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
+        string_view_t field_value{days.at(static_cast<size_t>(tm_time.tm_wday))};
         ScopedPadder p(field_value.size(), padinfo_, dest);
         fmt_helper::append_string_view(field_value, dest);
     }
 };
 
 // Full weekday name
-static std::array<const char *, 7> full_days{{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}};
+static constexpr std::array<const char *, 7> full_days{{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}};
 
 template <typename ScopedPadder>
 class A_formatter final : public flag_formatter {
@@ -151,8 +154,8 @@ public:
     explicit A_formatter(padding_info padinfo)
         : flag_formatter(padinfo) {}
 
-    void format(const details::log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
-        string_view_t field_value{full_days[static_cast<size_t>(tm_time.tm_wday)]};
+    void format(const log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
+        string_view_t field_value{full_days.at(static_cast<size_t>(tm_time.tm_wday))};
         ScopedPadder p(field_value.size(), padinfo_, dest);
         fmt_helper::append_string_view(field_value, dest);
     }
@@ -169,7 +172,7 @@ public:
         : flag_formatter(padinfo) {}
 
     void format(const details::log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
-        string_view_t field_value{months[static_cast<size_t>(tm_time.tm_mon)]};
+        string_view_t field_value{months.at(static_cast<size_t>(tm_time.tm_mon))};
         ScopedPadder p(field_value.size(), padinfo_, dest);
         fmt_helper::append_string_view(field_value, dest);
     }
@@ -186,7 +189,7 @@ public:
         : flag_formatter(padinfo) {}
 
     void format(const details::log_msg &, const std::tm &tm_time, memory_buf_t &dest) override {
-        string_view_t field_value{full_months[static_cast<size_t>(tm_time.tm_mon)]};
+        string_view_t field_value{full_months.at(static_cast<size_t>(tm_time.tm_mon))};
         ScopedPadder p(field_value.size(), padinfo_, dest);
         fmt_helper::append_string_view(field_value, dest);
     }
@@ -203,9 +206,9 @@ public:
         const size_t field_size = 24;
         ScopedPadder p(field_size, padinfo_, dest);
 
-        fmt_helper::append_string_view(days[static_cast<size_t>(tm_time.tm_wday)], dest);
+        fmt_helper::append_string_view(days.at(static_cast<size_t>(tm_time.tm_wday)), dest);
         dest.push_back(' ');
-        fmt_helper::append_string_view(months[static_cast<size_t>(tm_time.tm_mon)], dest);
+        fmt_helper::append_string_view(months.at(static_cast<size_t>(tm_time.tm_mon)), dest);
         dest.push_back(' ');
         fmt_helper::append_int(tm_time.tm_mday, dest);
         dest.push_back(' ');
@@ -493,8 +496,11 @@ public:
         : flag_formatter(padinfo) {}
 
     z_formatter() = default;
+    ~z_formatter() override = default;
     z_formatter(const z_formatter &) = delete;
     z_formatter &operator=(const z_formatter &) = delete;
+    z_formatter(z_formatter &&) = delete;
+    z_formatter &operator=(z_formatter &&) = delete;
 
     void format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest) override {
         const size_t field_size = 6;
@@ -626,12 +632,10 @@ public:
             return;
         }
 
-        size_t text_size;
+        size_t text_size = 0;
         if (padinfo_.enabled()) {
             // calc text size for padding based on "filename:line"
             text_size = std::char_traits<char>::length(msg.source.filename) + ScopedPadder::count_digits(msg.source.line) + 1;
-        } else {
-            text_size = 0;
         }
 
         ScopedPadder p(text_size, padinfo_, dest);
@@ -784,7 +788,7 @@ public:
         dest.push_back(' ');
 
         // append logger name if exists
-        if (msg.logger_name.size() > 0) {
+        if (!msg.logger_name.empty()) {
             dest.push_back('[');
             fmt_helper::append_string_view(msg.logger_name, dest);
             dest.push_back(']');
@@ -846,7 +850,7 @@ pattern_formatter::pattern_formatter(pattern_time_type time_type, std::string eo
 
 std::unique_ptr<formatter> pattern_formatter::clone() const {
     custom_flags cloned_custom_formatters;
-    for (auto &it : custom_handlers_) {
+    for (const auto &it : custom_handlers_) {
         cloned_custom_formatters[it.first] = it.second->clone();
     }
     auto cloned = std::make_unique<pattern_formatter>(pattern_, pattern_time_type_, eol_, std::move(cloned_custom_formatters));
@@ -1137,29 +1141,27 @@ details::padding_info pattern_formatter::handle_padspec_(std::string::const_iter
             ++it;
             break;
         default:
-            side = details::padding_info::pad_side::left;
+            side = padding_info::pad_side::left;
             break;
     }
 
-    if (it == end || !std::isdigit(static_cast<unsigned char>(*it))) {
+    if (it == end || (std::isdigit(static_cast<unsigned char>(*it)) == 0)) {
         return padding_info{};  // no padding if no digit found here
     }
 
     auto width = static_cast<size_t>(*it) - '0';
-    for (++it; it != end && std::isdigit(static_cast<unsigned char>(*it)); ++it) {
+    for (++it; it != end && (std::isdigit(static_cast<unsigned char>(*it)) != 0); ++it) {
         auto digit = static_cast<size_t>(*it) - '0';
         width = width * 10 + digit;
     }
 
     // search for the optional truncate marker '!'
-    bool truncate;
+    bool truncate = false;
     if (it != end && *it == '!') {
         truncate = true;
         ++it;
-    } else {
-        truncate = false;
     }
-    return details::padding_info{std::min<size_t>(width, max_width), side, truncate};
+    return padding_info{std::min<size_t>(width, max_width), side, truncate};
 }
 
 void pattern_formatter::compile_pattern_(const std::string &pattern) {
