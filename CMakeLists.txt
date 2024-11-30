@@ -279,6 +279,18 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
 endif()
 
 # ---------------------------------------------------------------------------------------
+# Check if fwrite_unlocked/_fwrite_nolock is available
+# ---------------------------------------------------------------------------------------
+include(CheckSymbolExists)
+if(WIN32)
+    check_symbol_exists(_fwrite_nolock "stdio.h" HAVE_FWRITE_UNLOCKED)
+else ()
+    check_symbol_exists(fwrite_unlocked "stdio.h" HAVE_FWRITE_UNLOCKED)
+endif()
+if(HAVE_FWRITE_UNLOCKED)
+    target_compile_definitions(spdlog PRIVATE SPDLOG_FWRITE_UNLOCKED)
+endif()
+# ---------------------------------------------------------------------------------------
 # Add required libraries for Android CMake build
 # ---------------------------------------------------------------------------------------
 if(ANDROID)

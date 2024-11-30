@@ -93,7 +93,7 @@ void file_helper::write(const memory_buf_t &buf) const {
     if (fd_ == nullptr) return;
     const size_t msg_size = buf.size();
     const auto *data = buf.data();
-    if (std::fwrite(data, 1, msg_size, fd_) != msg_size) {
+    if (!os::fwrite_bytes(data, msg_size, fd_)) {
         throw_spdlog_ex("Failed writing to file " + os::filename_to_str(filename_), errno);
     }
 }

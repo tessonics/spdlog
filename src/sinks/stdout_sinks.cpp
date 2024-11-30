@@ -1,11 +1,12 @@
 // Copyright(c) 2015-present, Gabi Melman & spdlog contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include "spdlog/sinks/stdout_sinks.h"
 
 #include <memory>
 
 #include "spdlog/pattern_formatter.h"
+#include "spdlog/sinks/stdout_sinks.h"
+#include "spdlog/details/os.h"
 
 // clang-format off
 #ifdef _WIN32
@@ -23,7 +24,6 @@
 
 // clang-format on
 namespace spdlog {
-
 namespace sinks {
 
 template <typename Mutex>
@@ -61,7 +61,7 @@ void stdout_sink_base<Mutex>::sink_it_(const details::log_msg &msg) {
 #else
     memory_buf_t formatted;
     base_sink<Mutex>::formatter_->format(msg, formatted);
-    ::fwrite(formatted.data(), sizeof(char), formatted.size(), file_);
+    details::os::fwrite_bytes(formatted.data(), formatted.size(), file_);
 #endif                // _WIN32
     ::fflush(file_);  // flush every line to terminal
 }

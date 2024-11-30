@@ -326,6 +326,17 @@ std::string getenv(const char *field) {
 // Return true on success
 bool fsync(FILE *fp) { return ::fsync(fileno(fp)) == 0; }
 
+
+// Non locking ::fwrite if possible (SPDLOG_FWRITE_UNLOCKED defined) or use the regular locking fwrite
+bool fwrite_bytes(const void *ptr, const size_t n_bytes, FILE *fp)
+{
+    #if defined(SPDLOG_FWRITE_UNLOCKED)
+        return ::fwrite_unlocked(ptr, 1, n_bytes, fp) == n_bytes;
+    #else
+        return std::fwrite(ptr, 1, n_bytes, fp) == n_bytes;
+    #endif
+}
+
 }  // namespace os
 }  // namespace details
 }  // namespace spdlog

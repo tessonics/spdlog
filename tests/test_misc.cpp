@@ -1,6 +1,10 @@
+#include <cstdio>
+#include <cstring>
 #include "includes.h"
 #include "spdlog/sinks/ostream_sink.h"
+#include "spdlog/details/os.h"
 #include "test_sink.h"
+
 
 template <class T>
 std::string log_info(const T &what, spdlog::level logger_level = spdlog::level::info) {
@@ -175,3 +179,32 @@ TEST_CASE("utf8 to utf16 conversion using windows api", "[windows utf]") {
     REQUIRE(std::wstring(buffer.data(), buffer.size()) == std::wstring(L"\x306d\x3053"));
 }
 #endif
+
+struct auto_closer {
+    FILE* fp = nullptr;
+    explicit auto_closer(FILE* f) : fp(f) {}
+    auto_closer(const auto_closer&) = delete;
+    auto_closer& operator=(const auto_closer&) = delete;
+    ~auto_closer() {
+        fp != nullptr && (std::fclose(fp) != 0);
+    }
+};
+
+
+TEST_CASE("os::fwrite_bytes", "[os]") {
+    using spdlog::details::os::fwrite_bytes;
+    const char* filename = "test_fwrite_bytes.txt";
+    const char *msg = "hello";
+    {
+        auto_closer closer(std::fopen(filename, "wb"));
+        REQUIRE(closer.fp != nullptr);
+        REQUIRE(fwrite_bytes(msg, std::strlen(msg), closer.fp) == true);
+        REQUIRE(fwrite_bytes(msg, 0, closer.fp) == true);
+        std::fflush(closer.fp);
+        REQUIRE(spdlog::details::os::filesize(closer.fp) == 5);
+    }
+    // fwrite_bytes should return false on write failure
+    auto_closer closer(std::fopen(filename, "r"));
+    REQUIRE(closer.fp != nullptr);
+    REQUIRE_FALSE(fwrite_bytes("Hello", 5, closer.fp));
+}
