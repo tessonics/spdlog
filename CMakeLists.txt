@@ -232,11 +232,30 @@ else()
     list(APPEND SPDLOG_HEADERS "include/spdlog/details/tcp_client_unix.h" "include/spdlog/details/udp_client_unix.h")
 endif()
 
+# ---------------------------------------------------------------------------------------
+# Check if fwrite_unlocked/_fwrite_nolock is available
+# ---------------------------------------------------------------------------------------
+include(CheckSymbolExists)
+if(WIN32)
+    check_symbol_exists(_fwrite_nolock "stdio.h" HAVE_FWRITE_UNLOCKED)
+else ()
+    check_symbol_exists(fwrite_unlocked "stdio.h" HAVE_FWRITE_UNLOCKED)
+endif()
+if(HAVE_FWRITE_UNLOCKED)
+    set(SPDLOG_FWRITE_UNLOCKED 1)
+endif()
+
+# ---------------------------------------------------------------------------------------
 # Generate spdlog_config.h based on the current configuration
+# ---------------------------------------------------------------------------------------
 set(OUT_CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/spdlog/spdlog_config.h")
 message(STATUS "Generating ${OUT_CONFIG_FILE}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog_config.h.in" ${OUT_CONFIG_FILE} @ONLY)
 list(APPEND SPDLOG_HEADERS ${OUT_CONFIG_FILE})
+
+# ---------------------------------------------------------------------------------------
+# spdlog library
+# ---------------------------------------------------------------------------------------
 if(BUILD_SHARED_LIBS)
     if(WIN32)
         set(VERSION_RC ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
@@ -271,25 +290,15 @@ set_target_properties(spdlog PROPERTIES VERSION ${SPDLOG_VERSION} SOVERSION
                                                                   ${SPDLOG_VERSION_MAJOR}.${SPDLOG_VERSION_MINOR})
 set_target_properties(spdlog PROPERTIES DEBUG_POSTFIX d)
 
+# ---------------------------------------------------------------------------------------
 # set source groups for visual studio
+# ---------------------------------------------------------------------------------------
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/include PREFIX include FILES ${SPDLOG_HEADERS})
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX sources FILES ${SPDLOG_SRCS})
     source_group(sources FILES ${VERSION_RC})
 endif()
 
-# ---------------------------------------------------------------------------------------
-# Check if fwrite_unlocked/_fwrite_nolock is available
-# ---------------------------------------------------------------------------------------
-include(CheckSymbolExists)
-if(WIN32)
-    check_symbol_exists(_fwrite_nolock "stdio.h" HAVE_FWRITE_UNLOCKED)
-else ()
-    check_symbol_exists(fwrite_unlocked "stdio.h" HAVE_FWRITE_UNLOCKED)
-endif()
-if(HAVE_FWRITE_UNLOCKED)
-    target_compile_definitions(spdlog PRIVATE SPDLOG_FWRITE_UNLOCKED)
-endif()
 # ---------------------------------------------------------------------------------------
 # Add required libraries for Android CMake build
 # ---------------------------------------------------------------------------------------

@@ -27,3 +27,5 @@
 
 // Use external fmtlib instead of bundled
 #cmakedefine SPDLOG_FMT_EXTERNAL
+
+#cmakedefine SPDLOG_FWRITE_UNLOCKED
