@@ -296,8 +296,7 @@ endif()
 # ---------------------------------------------------------------------------------------
 # spdlog private defines according to the options
 # ---------------------------------------------------------------------------------------
-foreach(
-        SPDLOG_OPTION
+foreach(SPDLOG_OPTION
         SPDLOG_CLOCK_COARSE
         SPDLOG_PREVENT_CHILD_FD
         SPDLOG_NO_THREAD_ID
