@@ -17,10 +17,6 @@
 #include "./source_loc.h"
 #include "./spdlog_config.h"
 
-#if __has_include(<version>)
-    #include <version>
-#endif
-
 #if defined(SPDLOG_SHARED_LIB)
     #if defined(_WIN32)
         #ifdef spdlog_EXPORTS
@@ -75,7 +71,6 @@ using log_clock = std::chrono::system_clock;
 using sink_ptr = std::shared_ptr<sinks::sink>;
 using sinks_init_list = std::initializer_list<sink_ptr>;
 using err_handler = std::function<void(const std::string &err_msg)>;
-
 using string_view_t = std::basic_string_view<char>;
 using wstring_view_t = std::basic_string_view<wchar_t>;
 
