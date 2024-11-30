@@ -196,13 +196,16 @@ struct auto_closer {
 
 
 TEST_CASE("os::fwrite_bytes", "[os]") {
+
     using spdlog::details::os::fwrite_bytes;
-    const char* filename = "test_fwrite_bytes.txt";
+    using spdlog::details::os::create_dir;
+    const char* filename = "log_tests/test_fwrite_bytes.txt";
     const char *msg = "hello";
+    prepare_logdir();
+    REQUIRE(create_dir("log_tests"));
     {
         auto_closer closer(std::fopen(filename, "wb"));
         REQUIRE(closer.fp != nullptr);
-        std::ofstream ofstream(filename, std::ios::binary);
         REQUIRE(fwrite_bytes(msg, std::strlen(msg), closer.fp) == true);
         REQUIRE(fwrite_bytes(msg, 0, closer.fp) == true);
         std::fflush(closer.fp);
