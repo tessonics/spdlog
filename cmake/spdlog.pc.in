@@ -7,6 +7,6 @@ Name: libspdlog-2
 Description: Fast C++ logging library.
 URL: https://github.com/gabime/@PROJECT_NAME@
 Version: @SPDLOG_VERSION@
-CFlags: -I${includedir} @PKG_CONFIG_DEFINES@
-Libs: -L${libdir} -lspdlog-@SPDLOG_VERSION_MAJOR@.@SPDLOG_VERSION_MINOR@
+CFlags: -I${includedir}
+Libs: -L${libdir} -lspdlog-@SPDLOG_VERSION_MAJOR@.@SPDLOG_VERSION_MINOR@ -pthread
 Requires: fmt
