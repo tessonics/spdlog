@@ -42,7 +42,7 @@ jobs:
           cd build
           cmake -G "${{ matrix.config.GENERATOR }}"  -A x64 `
             -D CMAKE_BUILD_TYPE=${{ matrix.config.BUILD_TYPE }} `
-            -D BUILD_SHARED_LIBS=${{ matrix.config.BUILD_SHARED }} `            
+            -D BUILD_SHARED_LIBS=${{ matrix.config.BUILD_SHARED }} `        
             -D SPDLOG_BUILD_EXAMPLE=${{ matrix.config.BUILD_EXAMPLE }} `
             -D SPDLOG_BUILD_TESTS=ON `
             -D SPDLOG_BUILD_WARNINGS=${{ matrix.config.FATAL_ERRORS }} `
