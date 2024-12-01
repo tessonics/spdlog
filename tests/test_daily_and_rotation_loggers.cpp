@@ -8,7 +8,6 @@
 
 using filename_memory_buf_t = spdlog::memory_buf_t;
 
-
 TEST_CASE("daily_logger with dateonly calculator", "[daily_logger]") {
     using sink_type = spdlog::sinks::daily_file_sink<std::mutex, spdlog::sinks::daily_filename_calculator>;
 

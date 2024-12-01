@@ -51,7 +51,9 @@ void spdlog::async_logger::flush_() {
 void spdlog::async_logger::backend_sink_it_(const details::log_msg &msg) {
     for (auto &sink : sinks_) {
         if (sink->should_log(msg.log_level)) {
-            try { sink->log(msg); }
+            try {
+                sink->log(msg);
+            }
             SPDLOG_LOGGER_CATCH(msg.source)
         }
     }
@@ -63,7 +65,9 @@ void spdlog::async_logger::backend_sink_it_(const details::log_msg &msg) {
 
 void spdlog::async_logger::backend_flush_() {
     for (auto &sink : sinks_) {
-        try { sink->flush(); }
+        try {
+            sink->flush();
+        }
         SPDLOG_LOGGER_CATCH(source_loc())
     }
 }

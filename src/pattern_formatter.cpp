@@ -148,7 +148,8 @@ public:
 };
 
 // Full weekday name
-static constexpr std::array<const char *, 7> full_days{{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}};
+static constexpr std::array<const char *, 7> full_days{
+    {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}};
 
 template <typename ScopedPadder>
 class A_formatter final : public flag_formatter {

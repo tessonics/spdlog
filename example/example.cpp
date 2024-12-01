@@ -284,7 +284,9 @@ public:
     }
 
     [[nodiscard]]
-    std::unique_ptr<custom_flag_formatter> clone() const override { return std::make_unique<my_formatter_flag>(); }
+    std::unique_ptr<custom_flag_formatter> clone() const override {
+        return std::make_unique<my_formatter_flag>();
+    }
 };
 
 void custom_flags_example() {

@@ -4,7 +4,7 @@
 #pragma once
 #include <cstdint>
 
-namespace spdlog {// source location
+namespace spdlog {  // source location
 struct source_loc {
     constexpr source_loc() = default;
     constexpr source_loc(const char *filename_in, std::uint_least32_t line_in, const char *funcname_in)

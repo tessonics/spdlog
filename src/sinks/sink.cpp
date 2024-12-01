@@ -11,6 +11,4 @@ bool spdlog::sinks::sink::should_log(spdlog::level msg_level) const {
 
 void spdlog::sinks::sink::set_level(level level) { level_.store(level, std::memory_order_relaxed); }
 
-spdlog::level spdlog::sinks::sink::log_level() const {
-    return level_.load(std::memory_order_relaxed);
-}
+spdlog::level spdlog::sinks::sink::log_level() const { return level_.load(std::memory_order_relaxed); }

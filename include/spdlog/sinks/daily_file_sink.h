@@ -45,9 +45,9 @@ struct daily_filename_calculator {
  */
 struct daily_filename_format_calculator {
     static filename_t calc_filename(const filename_t &file_path, const tm &now_tm) {
-    std::stringstream stream;
-    stream << std::put_time(&now_tm, file_path.c_str());
-    return stream.str();
+        std::stringstream stream;
+        stream << std::put_time(&now_tm, file_path.c_str());
+        return stream.str();
     }
 };
 

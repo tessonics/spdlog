@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -23,7 +24,6 @@
 #include <ctime>
 #include <string>
 #include <thread>
-#include <cassert>
 
 #include "spdlog/common.h"
 #include "spdlog/details/os.h"
@@ -76,9 +76,7 @@ bool fopen_s(FILE **fp, const filename_t &filename, const filename_t &mode) {
     return *fp == nullptr;
 }
 
-int remove(const filename_t &filename) noexcept {
-    return std::remove(filename.c_str());
-}
+int remove(const filename_t &filename) noexcept { return std::remove(filename.c_str()); }
 
 int remove_if_exists(const filename_t &filename) noexcept { return path_exists(filename) ? remove(filename) : 0; }
 
@@ -169,7 +167,6 @@ bool is_color_terminal() noexcept { return true; }
 // Determine if the terminal attached
 bool in_terminal(FILE *file) noexcept { return ::_isatty(_fileno(file)) != 0; }
 
-
 void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target) {
     if (wstr.size() > static_cast<size_t>((std::numeric_limits<int>::max)()) / 4 - 1) {
         throw_spdlog_ex("UTF-16 string is too big to be converted to UTF-8");
@@ -183,14 +180,12 @@ void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target) {
 
     int result_size = static_cast<int>(target.capacity());
     if ((wstr_size + 1) * 4 > result_size) {
-        result_size =
-            ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, NULL, 0, NULL, NULL);
+        result_size = ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, NULL, 0, NULL, NULL);
     }
 
     if (result_size > 0) {
         target.resize(result_size);
-        result_size = ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, target.data(),
-                                            result_size, NULL, NULL);
+        result_size = ::WideCharToMultiByte(CP_UTF8, 0, wstr.data(), wstr_size, target.data(), result_size, NULL, NULL);
 
         if (result_size > 0) {
             target.resize(result_size);
@@ -198,8 +193,7 @@ void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target) {
         }
     }
 
-    throw_spdlog_ex(
-        fmt_lib::format("WideCharToMultiByte failed. Last error: {}", ::GetLastError()));
+    throw_spdlog_ex(fmt_lib::format("WideCharToMultiByte failed. Last error: {}", ::GetLastError()));
 }
 
 void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
@@ -214,27 +208,22 @@ void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
     }
 
     // find the size to allocate for the result buffer
-    int result_size =
-        ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, NULL, 0);
+    int result_size = ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, NULL, 0);
 
     if (result_size > 0) {
         target.resize(result_size);
-        result_size = ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, target.data(),
-                                            result_size);
+        result_size = ::MultiByteToWideChar(CP_UTF8, 0, str.data(), str_size, target.data(), result_size);
         if (result_size > 0) {
             assert(result_size == target.size());
             return;
         }
     }
 
-    throw_spdlog_ex(
-        fmt_lib::format("MultiByteToWideChar failed. Last error: {}", ::GetLastError()));
+    throw_spdlog_ex(fmt_lib::format("MultiByteToWideChar failed. Last error: {}", ::GetLastError()));
 }
 
 // return true on success
-static bool mkdir_(const filename_t &path) {
-    return ::_mkdir(path.c_str()) == 0;
-}
+static bool mkdir_(const filename_t &path) { return ::_mkdir(path.c_str()) == 0; }
 
 // create the given directory - and all directories leading to it
 // return true on success or if the directory already exists
@@ -305,13 +294,12 @@ std::string getenv(const char *field) {
 bool fsync(FILE *fp) { return FlushFileBuffers(reinterpret_cast<HANDLE>(_get_osfhandle(_fileno(fp)))) != 0; }
 
 // Non locking fwrite if possible (SPDLOG_FWRITE_UNLOCKED defined) or use the regular locking fwrite
-bool fwrite_bytes(const void *ptr, const size_t n_bytes, FILE *fp)
-{
-    #if defined(SPDLOG_FWRITE_UNLOCKED)
-        return _fwrite_nolock(ptr, 1, n_bytes, fp) == n_bytes;
-    #else
-        return std::fwrite(ptr, 1, n_bytes, fp) == n_bytes;
-    #endif
+bool fwrite_bytes(const void *ptr, const size_t n_bytes, FILE *fp) {
+#if defined(SPDLOG_FWRITE_UNLOCKED)
+    return _fwrite_nolock(ptr, 1, n_bytes, fp) == n_bytes;
+#else
+    return std::fwrite(ptr, 1, n_bytes, fp) == n_bytes;
+#endif
 }
 }  // namespace os
 }  // namespace details

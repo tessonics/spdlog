@@ -76,10 +76,9 @@ SPDLOG_API bool is_color_terminal() noexcept;
 SPDLOG_API bool in_terminal(FILE *file) noexcept;
 
 #if (defined _WIN32)
-    SPDLOG_API void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target);
-    SPDLOG_API void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target);
+SPDLOG_API void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target);
+SPDLOG_API void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target);
 #endif
-
 
 // Return directory name from given path or empty string
 // "abc/file" => "abc"
@@ -99,7 +98,6 @@ SPDLOG_API std::string getenv(const char *field);
 // Do fsync by FILE objectpointer.
 // Return true on success.
 SPDLOG_API bool fsync(FILE *fp);
-
 
 // Do non-locking fwrite if possible by the os or use the regular locking fwrite
 // Return true on success.

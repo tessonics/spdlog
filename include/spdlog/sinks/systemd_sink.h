@@ -68,17 +68,14 @@ protected:
         if (msg.source.empty()) {
             // Note: function call inside '()' to avoid macro expansion
             err = (sd_journal_send)("MESSAGE=%.*s", static_cast<int>(length), payload.data(), "PRIORITY=%d",
-                                    syslog_level(msg.log_level),
-                                    "TID=%zu", msg.thread_id,
-                                    "SYSLOG_IDENTIFIER=%.*s", static_cast<int>(syslog_identifier.size()),
-                                    syslog_identifier.data(), nullptr);
+                                    syslog_level(msg.log_level), "TID=%zu", msg.thread_id, "SYSLOG_IDENTIFIER=%.*s",
+                                    static_cast<int>(syslog_identifier.size()), syslog_identifier.data(), nullptr);
         } else {
             err = (sd_journal_send)("MESSAGE=%.*s", static_cast<int>(length), payload.data(), "PRIORITY=%d",
-                                    syslog_level(msg.log_level),
-                                    "TID=%zu", msg.thread_id,
-                                    "SYSLOG_IDENTIFIER=%.*s", static_cast<int>(syslog_identifier.size()),
-                                    syslog_identifier.data(), "CODE_FILE=%s", msg.source.filename, "CODE_LINE=%d",
-                                    msg.source.line, "CODE_FUNC=%s", msg.source.funcname, nullptr);
+                                    syslog_level(msg.log_level), "TID=%zu", msg.thread_id, "SYSLOG_IDENTIFIER=%.*s",
+                                    static_cast<int>(syslog_identifier.size()), syslog_identifier.data(), "CODE_FILE=%s",
+                                    msg.source.filename, "CODE_LINE=%d", msg.source.line, "CODE_FUNC=%s", msg.source.funcname,
+                                    nullptr);
         }
 
         if (err) {

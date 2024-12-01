@@ -45,8 +45,8 @@ thread_pool::~thread_pool() {
         for (auto &t : threads_) {
             t.join();
         }
+    } catch (...) {
     }
-    catch (...) {}
 }
 
 void thread_pool::post_log(async_logger_ptr &&worker_ptr, const details::log_msg &msg, async_overflow_policy overflow_policy) {

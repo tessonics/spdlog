@@ -22,7 +22,6 @@
 #include "./details/log_msg.h"
 #include "./sinks/sink.h"
 
-
 #define SPDLOG_LOGGER_CATCH(location)                                                                                     \
     catch (const std::exception &ex) {                                                                                    \
         if (!location.empty()) {                                                                                          \
@@ -35,7 +34,6 @@
         err_handler_("Rethrowing unknown exception in logger");                                                           \
         throw;                                                                                                            \
     }
-
 
 namespace spdlog {
 
@@ -197,7 +195,9 @@ protected:
         assert(should_log(msg.log_level));
         for (auto &sink : sinks_) {
             if (sink->should_log(msg.log_level)) {
-                try { sink->log(msg); }
+                try {
+                    sink->log(msg);
+                }
                 SPDLOG_LOGGER_CATCH(msg.source)
             }
         }

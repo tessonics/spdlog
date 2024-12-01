@@ -109,7 +109,7 @@ int rename(const filename_t &filename1, const filename_t &filename2) noexcept {
 
 // Return true if path exists (file or directory)
 bool path_exists(const filename_t &filename) noexcept {
-    struct stat buffer{};
+    struct stat buffer {};
     return (::stat(filename.c_str(), &buffer) == 0);
 }
 
@@ -127,7 +127,7 @@ size_t filesize(FILE *f) {
 #endif
     // 64 bits(but not in osx, linux/musl or cygwin, where fstat64 is deprecated)
 #if ((defined(__linux__) && defined(__GLIBC__)) || defined(__sun) || defined(_AIX)) && (defined(__LP64__) || defined(_LP64))
-    struct stat64 st{};
+    struct stat64 st {};
     if (::fstat64(fd, &st) == 0) {
         return static_cast<size_t>(st.st_size);
     }
@@ -326,15 +326,13 @@ std::string getenv(const char *field) {
 // Return true on success
 bool fsync(FILE *fp) { return ::fsync(fileno(fp)) == 0; }
 
-
 // Non locking ::fwrite if possible (SPDLOG_FWRITE_UNLOCKED defined) or use the regular locking fwrite
-bool fwrite_bytes(const void *ptr, const size_t n_bytes, FILE *fp)
-{
-    #if defined(SPDLOG_FWRITE_UNLOCKED)
-        return ::fwrite_unlocked(ptr, 1, n_bytes, fp) == n_bytes;
-    #else
-        return std::fwrite(ptr, 1, n_bytes, fp) == n_bytes;
-    #endif
+bool fwrite_bytes(const void *ptr, const size_t n_bytes, FILE *fp) {
+#if defined(SPDLOG_FWRITE_UNLOCKED)
+    return ::fwrite_unlocked(ptr, 1, n_bytes, fp) == n_bytes;
+#else
+    return std::fwrite(ptr, 1, n_bytes, fp) == n_bytes;
+#endif
 }
 
 }  // namespace os

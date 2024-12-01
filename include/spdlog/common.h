@@ -16,7 +16,6 @@
 
 #include "./source_loc.h"
 
-
 #if defined(SPDLOG_SHARED_LIB)
     #if defined(_WIN32)
         #ifdef spdlog_EXPORTS
