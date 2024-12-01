@@ -167,7 +167,6 @@ set(SPDLOG_HEADERS
     "include/spdlog/fmt/bin_to_hex.h"
     "include/spdlog/fmt/fmt.h"
     "include/spdlog/sinks/android_sink.h"
-    "include/spdlog/sinks/ansicolor_sink.h"
     "include/spdlog/sinks/base_sink.h"
     "include/spdlog/sinks/basic_file_sink.h"
     "include/spdlog/sinks/callback_sink.h"
@@ -204,7 +203,6 @@ set(SPDLOG_SRCS
     "src/details/periodic_worker.cpp"
     "src/details/registry.cpp"
     "src/details/thread_pool.cpp"
-    "src/sinks/ansicolor_sink.cpp"
     "src/sinks/base_sink.cpp"
     "src/sinks/basic_file_sink.cpp"
     "src/sinks/rotating_file_sink.cpp"
@@ -213,18 +211,24 @@ set(SPDLOG_SRCS
     "src/sinks/stdout_sinks.cpp")
 
 if(WIN32)
-    list(APPEND SPDLOG_SRCS "src/details/os_windows.cpp" "src/sinks/wincolor_sink.cpp")
+    list(APPEND SPDLOG_SRCS
+            "src/details/os_windows.cpp"
+            "src/sinks/wincolor_sink.cpp")
     list(
-        APPEND
-        SPDLOG_HEADERS
-        "include/spdlog/details/tcp_client_windows.h"
-        "include/spdlog/details/udp_client_windows.h"
-        "include/spdlog/details/windows_include.h"
-        "include/spdlog/sinks/win_eventlog_sink.h"
-        "include/spdlog/sinks/wincolor_sink.h")
+        APPEND SPDLOG_HEADERS
+            "include/spdlog/sinks/wincolor_sink.h"
+            "include/spdlog/details/tcp_client_windows.h"
+            "include/spdlog/details/udp_client_windows.h"
+            "include/spdlog/details/windows_include.h"
+            "include/spdlog/sinks/win_eventlog_sink.h")
 else()
-    list(APPEND SPDLOG_SRCS "src/details/os_unix.cpp")
-    list(APPEND SPDLOG_HEADERS "include/spdlog/details/tcp_client_unix.h" "include/spdlog/details/udp_client_unix.h")
+    list(APPEND SPDLOG_SRCS
+            "src/details/os_unix.cpp"
+            "src/sinks/ansicolor_sink.cpp")
+    list(APPEND SPDLOG_HEADERS
+        "include/spdlog/details/tcp_client_unix.h"
+        "include/spdlog/details/udp_client_unix.h"
+        "include/spdlog/sinks/ansicolor_sink.h")
 endif()
 
 # ---------------------------------------------------------------------------------------
@@ -233,7 +237,7 @@ endif()
 include(CheckSymbolExists)
 if(WIN32)
     check_symbol_exists(_fwrite_nolock "stdio.h" HAVE_FWRITE_UNLOCKED)
-else ()
+else()
     check_symbol_exists(fwrite_unlocked "stdio.h" HAVE_FWRITE_UNLOCKED)
 endif()
 if(HAVE_FWRITE_UNLOCKED)
@@ -248,7 +252,7 @@ if(BUILD_SHARED_LIBS)
         set(VERSION_RC ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.rc.in ${CMAKE_CURRENT_BINARY_DIR}/version.rc @ONLY)
     endif()
-    add_library(spdlog SHARED ${SPDLOG_SRCS} ${SPDLOG_HEADERS} ${VERSION_RC})
+    add_library(spdlog SHARED ${VERSION_RC})
     target_compile_definitions(spdlog PUBLIC SPDLOG_SHARED_LIB)
     if(MSVC)
         # disable dlls related warnings on msvc
@@ -256,16 +260,23 @@ if(BUILD_SHARED_LIBS)
                                              /wd4275>)
     endif()
 else()
-    add_library(spdlog STATIC ${SPDLOG_SRCS} ${SPDLOG_HEADERS})
+    add_library(spdlog STATIC)
 endif()
 add_library(spdlog::spdlog ALIAS spdlog)
+target_sources(spdlog PRIVATE ${SPDLOG_SRCS})
+target_sources(
+    spdlog
+    PUBLIC FILE_SET pub_headers
+           TYPE HEADERS
+           BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include
+           FILES ${SPDLOG_HEADERS})
 
 set(SPDLOG_INCLUDES_LEVEL "")
 if(SPDLOG_SYSTEM_INCLUDES)
     set(SPDLOG_INCLUDES_LEVEL "SYSTEM")
 endif()
 
-set_target_properties(spdlog PROPERTIES PUBLIC_HEADER "${SPDLOG_HEADERS}")
+# set_target_properties(spdlog PROPERTIES PUBLIC_HEADER "${SPDLOG_HEADERS}")
 
 target_include_directories(spdlog ${SPDLOG_INCLUDES_LEVEL} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                                                   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -296,12 +307,8 @@ endif()
 # ---------------------------------------------------------------------------------------
 # spdlog private defines according to the options
 # ---------------------------------------------------------------------------------------
-foreach(SPDLOG_OPTION
-        SPDLOG_CLOCK_COARSE
-        SPDLOG_PREVENT_CHILD_FD
-        SPDLOG_NO_THREAD_ID
-        SPDLOG_DISABLE_DEFAULT_LOGGER
-        SPDLOG_FWRITE_UNLOCKED)
+foreach(SPDLOG_OPTION SPDLOG_CLOCK_COARSE SPDLOG_PREVENT_CHILD_FD SPDLOG_NO_THREAD_ID SPDLOG_DISABLE_DEFAULT_LOGGER
+                      SPDLOG_FWRITE_UNLOCKED)
     if(${SPDLOG_OPTION})
         target_compile_definitions(spdlog PRIVATE ${SPDLOG_OPTION})
     endif()
@@ -343,21 +350,22 @@ if(SPDLOG_INSTALL)
     # ---------------------------------------------------------------------------------------
     # Include files
     # ---------------------------------------------------------------------------------------
+    set(installed_include_dir "${CMAKE_INSTALL_INCLUDEDIR}/spdlog-2")
     install(
         TARGETS spdlog
         EXPORT spdlogTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/spdlog)
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} FILE_SET pub_headers
+                DESTINATION "${installed_include_dir}")
 
     # ---------------------------------------------------------------------------------------
     # Install pkg-config file
     # ---------------------------------------------------------------------------------------
-    if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
-        set(PKG_CONFIG_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+    if(IS_ABSOLUTE "${installed_include_dir}")
+        set(PKG_CONFIG_INCLUDEDIR "${installed_include_dir}")
     else()
-        set(PKG_CONFIG_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+        set(PKG_CONFIG_INCLUDEDIR "\${prefix}/${installed_include_dir}")
     endif()
     if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
         set(PKG_CONFIG_LIBDIR "${CMAKE_INSTALL_LIBDIR}")

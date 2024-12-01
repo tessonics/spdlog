@@ -3,10 +3,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(spdlog_example CXX)
 
-if(NOT TARGET spdlog)
-    # Stand-alone build
-    find_package(spdlog REQUIRED)
-endif()
+find_package(spdlog REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example PRIVATE spdlog::spdlog $<$<BOOL:${MINGW}>:ws2_32>)
+target_link_libraries(example PRIVATE spdlog $<$<BOOL:${MINGW}>:ws2_32>)
