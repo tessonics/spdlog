@@ -5,7 +5,7 @@ project(spdlog_example CXX)
 
 if(NOT TARGET spdlog)
     # Stand-alone build
-    find_package(spdlog REQUIRED)
+    find_package(spdlog 2 REQUIRED)
 endif()
 
 add_executable(example example.cpp)
