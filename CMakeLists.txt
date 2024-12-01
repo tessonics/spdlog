@@ -276,8 +276,6 @@ if(SPDLOG_SYSTEM_INCLUDES)
     set(SPDLOG_INCLUDES_LEVEL "SYSTEM")
 endif()
 
-# set_target_properties(spdlog PROPERTIES PUBLIC_HEADER "${SPDLOG_HEADERS}")
-
 target_include_directories(spdlog ${SPDLOG_INCLUDES_LEVEL} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                                                   "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
@@ -286,7 +284,10 @@ target_link_libraries(spdlog PUBLIC fmt::fmt)
 spdlog_enable_warnings(spdlog)
 set_target_properties(spdlog PROPERTIES VERSION ${SPDLOG_VERSION} SOVERSION
                                                                   ${SPDLOG_VERSION_MAJOR}.${SPDLOG_VERSION_MINOR})
-set_target_properties(spdlog PROPERTIES DEBUG_POSTFIX d)
+
+set(SPDLOG_NAME spdlog-${SPDLOG_VERSION_MAJOR})
+set_target_properties(spdlog PROPERTIES OUTPUT_NAME "${SPDLOG_NAME}")
+set_target_properties(spdlog PROPERTIES DEBUG_POSTFIX  "-${SPDLOG_VERSION_MAJOR}.${SPDLOG_VERSION_MINOR}d")
 
 # ---------------------------------------------------------------------------------------
 # set source groups for visual studio
@@ -340,41 +341,24 @@ endif()
 if(SPDLOG_INSTALL)
     message(STATUS "Generating install")
     set(project_config_in "${CMAKE_CURRENT_LIST_DIR}/cmake/spdlogConfig.cmake.in")
-    set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfig.cmake")
+    set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG_NAME}/spdlogConfig.cmake")
     set(config_targets_file "spdlogConfigTargets.cmake")
     set(version_config_file "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfigVersion.cmake")
-    set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/spdlog")
-    set(pkgconfig_install_dir "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-    set(pkg_config "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc")
+    set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${SPDLOG_NAME}")
 
     # ---------------------------------------------------------------------------------------
     # Include files
     # ---------------------------------------------------------------------------------------
-    set(installed_include_dir "${CMAKE_INSTALL_INCLUDEDIR}/spdlog-2")
+    set(installed_include_dir "${CMAKE_INSTALL_INCLUDEDIR}/${SPDLOG_NAME}")
     install(
         TARGETS spdlog
         EXPORT spdlogTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} FILE_SET pub_headers
-                DESTINATION "${installed_include_dir}")
-
-    # ---------------------------------------------------------------------------------------
-    # Install pkg-config file
-    # ---------------------------------------------------------------------------------------
-    if(IS_ABSOLUTE "${installed_include_dir}")
-        set(PKG_CONFIG_INCLUDEDIR "${installed_include_dir}")
-    else()
-        set(PKG_CONFIG_INCLUDEDIR "\${prefix}/${installed_include_dir}")
-    endif()
-    if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
-        set(PKG_CONFIG_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
-    else()
-        set(PKG_CONFIG_LIBDIR "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
-    endif()
-    configure_file("cmake/spdlog.pc.in" "${pkg_config}" @ONLY)
-    message(STATUS "Installing pkg-config ${pkg_config} in ${pkgconfig_install_dir}")
-    install(FILES "${pkg_config}" DESTINATION "${pkgconfig_install_dir}")
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/${SPDLOG_NAME}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/${SPDLOG_NAME}"
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/${SPDLOG_NAME}"
+        FILE_SET pub_headers
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${SPDLOG_NAME}")
+    message(STATUS "Installing spdlog in ${CMAKE_INSTALL_LIBDIR}/${SPDLOG_NAME}")
 
     # ---------------------------------------------------------------------------------------
     # Install CMake config files
