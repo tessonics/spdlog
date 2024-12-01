@@ -16,24 +16,18 @@ jobs:
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
-            WCHAR: 'OFF'
-            WCHAR_FILES: 'OFF'
             BUILD_EXAMPLE: 'OFF'
             CXX_STANDARD: 20
           - GENERATOR: "Visual Studio 17 2022"
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
-            WCHAR: 'ON'
-            WCHAR_FILES: 'ON'
             BUILD_EXAMPLE: 'OFF'
             CXX_STANDARD: 20
           - GENERATOR: "Visual Studio 17 2022"
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
-            WCHAR: 'OFF'
-            WCHAR_FILES: 'OFF'
             BUILD_EXAMPLE: 'ON'
             CXX_STANDARD: 17
 
@@ -41,15 +35,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: CMake ${{ matrix.config.GENERATOR }} CXX=${{matrix.config.CXX_STANDARD}} WCHAR=${{matrix.config.WCHAR_FILES}}
+      - name: CMake ${{ matrix.config.GENERATOR }} CXX=${{matrix.config.CXX_STANDARD}}
         shell: pwsh
         run: |
           mkdir build
           cd build
           cmake -G "${{ matrix.config.GENERATOR }}"  -A x64 `
             -D CMAKE_BUILD_TYPE=${{ matrix.config.BUILD_TYPE }} `
-            -D BUILD_SHARED_LIBS=${{ matrix.config.BUILD_SHARED }} `
-            -D SPDLOG_WCHAR_SUPPORT=${{ matrix.config.WCHAR }} `
+            -D BUILD_SHARED_LIBS=${{ matrix.config.BUILD_SHARED }} `            
             -D SPDLOG_BUILD_EXAMPLE=${{ matrix.config.BUILD_EXAMPLE }} `
             -D SPDLOG_BUILD_TESTS=ON `
             -D SPDLOG_BUILD_WARNINGS=${{ matrix.config.FATAL_ERRORS }} `
@@ -81,14 +74,12 @@ jobs:
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
-            WCHAR: 'OFF'
             BUILD_EXAMPLE: 'ON'
             CXX_STANDARD: 17
           - GENERATOR: "Visual Studio 16 2019"
             BUILD_TYPE: Release
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
-            WCHAR: 'OFF'
             BUILD_EXAMPLE: 'ON'
             CXX_STANDARD: 20
 
@@ -96,7 +87,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: CMake ${{ matrix.config.GENERATOR }} CXX=${{matrix.config.CXX_STANDARD}} WCHAR=${{matrix.config.WCHAR_FILES}}
+      - name: CMake ${{ matrix.config.GENERATOR }} CXX=${{matrix.config.CXX_STANDARD}}
         shell: pwsh
         run: |
           mkdir build
@@ -104,7 +95,6 @@ jobs:
           cmake -G "${{ matrix.config.GENERATOR }}"  -A x64 `
             -D CMAKE_BUILD_TYPE=${{ matrix.config.BUILD_TYPE }} `
             -D BUILD_SHARED_LIBS=${{ matrix.config.BUILD_SHARED }} `
-            -D SPDLOG_WCHAR_SUPPORT=${{ matrix.config.WCHAR }} `
             -D SPDLOG_BUILD_EXAMPLE=${{ matrix.config.BUILD_EXAMPLE }} `
             -D SPDLOG_BUILD_TESTS=ON `
             -D SPDLOG_BUILD_WARNINGS=${{ matrix.config.FATAL_ERRORS }} `
