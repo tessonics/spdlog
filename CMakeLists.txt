@@ -286,7 +286,6 @@ set_target_properties(spdlog PROPERTIES VERSION ${SPDLOG_VERSION} SOVERSION
                                                                   ${SPDLOG_VERSION_MAJOR}.${SPDLOG_VERSION_MINOR})
 
 set(SPDLOG_NAME spdlog-${SPDLOG_VERSION_MAJOR})
-set_target_properties(spdlog PROPERTIES OUTPUT_NAME "${SPDLOG_NAME}")
 set_target_properties(spdlog PROPERTIES DEBUG_POSTFIX  "-${SPDLOG_VERSION_MAJOR}.${SPDLOG_VERSION_MINOR}d")
 
 # ---------------------------------------------------------------------------------------
@@ -341,7 +340,7 @@ endif()
 if(SPDLOG_INSTALL)
     message(STATUS "Generating install")
     set(project_config_in "${CMAKE_CURRENT_LIST_DIR}/cmake/spdlogConfig.cmake.in")
-    set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/${SPDLOG_NAME}/spdlogConfig.cmake")
+    set(project_config_out "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfig.cmake")
     set(config_targets_file "spdlogConfigTargets.cmake")
     set(version_config_file "${CMAKE_CURRENT_BINARY_DIR}/spdlogConfigVersion.cmake")
     set(export_dest_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${SPDLOG_NAME}")
