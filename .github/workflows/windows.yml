@@ -23,10 +23,10 @@ jobs:
             BUILD_SHARED: 'ON'
             FATAL_ERRORS: 'ON'
             BUILD_EXAMPLE: 'OFF'
-            CXX_STANDARD: 20
+            CXX_STANDARD: 17
           - GENERATOR: "Visual Studio 17 2022"
             BUILD_TYPE: Release
-            BUILD_SHARED: 'ON'
+            BUILD_SHARED: 'OFF'
             FATAL_ERRORS: 'ON'
             BUILD_EXAMPLE: 'ON'
             CXX_STANDARD: 17
