@@ -70,7 +70,7 @@ static void test_split_ext(const spdlog::filename_t::value_type *fname,
 
     spdlog::filename_t basename;
     spdlog::filename_t ext;
-    std::tie(basename, ext) = file_helper::split_by_extension(filename);
+    std::tie(basename, ext) = spdlog::details::os::split_by_extension(filename);
     REQUIRE(basename == expected_base);
     REQUIRE(ext == expected_ext);
 }
@@ -82,7 +82,7 @@ TEST_CASE("file_helper_split_by_extension", "[file_helper::split_by_extension()]
     test_split_ext(SPDLOG_FILENAME_T("/aaa/bb.d/mylog"), SPDLOG_FILENAME_T("/aaa/bb.d/mylog"), SPDLOG_FILENAME_T(""));
     test_split_ext(SPDLOG_FILENAME_T("/aaa/bb.d/mylog.txt"), SPDLOG_FILENAME_T("/aaa/bb.d/mylog"), SPDLOG_FILENAME_T(".txt"));
     test_split_ext(SPDLOG_FILENAME_T("aaa/bbb/ccc/mylog.txt"), SPDLOG_FILENAME_T("aaa/bbb/ccc/mylog"), SPDLOG_FILENAME_T(".txt"));
-    test_split_ext(SPDLOG_FILENAME_T("aaa/bbb/ccc/mylog."), SPDLOG_FILENAME_T("aaa/bbb/ccc/mylog."), SPDLOG_FILENAME_T(""));
+    test_split_ext(SPDLOG_FILENAME_T("aaa/bbb/ccc/mylog."), SPDLOG_FILENAME_T("aaa/bbb/ccc/mylog"), SPDLOG_FILENAME_T("."));
     test_split_ext(SPDLOG_FILENAME_T("aaa/bbb/ccc/.mylog.txt"), SPDLOG_FILENAME_T("aaa/bbb/ccc/.mylog"),
                    SPDLOG_FILENAME_T(".txt"));
     test_split_ext(SPDLOG_FILENAME_T("/aaa/bbb/ccc/mylog.txt"), SPDLOG_FILENAME_T("/aaa/bbb/ccc/mylog"),
@@ -92,7 +92,7 @@ TEST_CASE("file_helper_split_by_extension", "[file_helper::split_by_extension()]
     test_split_ext(SPDLOG_FILENAME_T(".././mylog.txt"), SPDLOG_FILENAME_T(".././mylog"), SPDLOG_FILENAME_T(".txt"));
     test_split_ext(SPDLOG_FILENAME_T(".././mylog.txt/xxx"), SPDLOG_FILENAME_T(".././mylog.txt/xxx"), SPDLOG_FILENAME_T(""));
     test_split_ext(SPDLOG_FILENAME_T("/mylog.txt"), SPDLOG_FILENAME_T("/mylog"), SPDLOG_FILENAME_T(".txt"));
-    test_split_ext(SPDLOG_FILENAME_T("//mylog.txt"), SPDLOG_FILENAME_T("//mylog"), SPDLOG_FILENAME_T(".txt"));
+    test_split_ext(SPDLOG_FILENAME_T("///mylog.txt"), SPDLOG_FILENAME_T("///mylog"), SPDLOG_FILENAME_T(".txt"));
     test_split_ext(SPDLOG_FILENAME_T(""), SPDLOG_FILENAME_T(""), SPDLOG_FILENAME_T(""));
     test_split_ext(SPDLOG_FILENAME_T("."), SPDLOG_FILENAME_T("."), SPDLOG_FILENAME_T(""));
     test_split_ext(SPDLOG_FILENAME_T("..txt"), SPDLOG_FILENAME_T("."), SPDLOG_FILENAME_T(".txt"));

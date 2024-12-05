@@ -22,15 +22,17 @@ namespace spdlog {
 namespace sinks {
 
 /*
- * Generator of Hourly log file names in format basename.YYYY-MM-DD-HH.ext
+ * Generator of Hourly log file names in format basename_YYYY-MM-DD_HH.ext
  */
 struct hourly_filename_calculator {
-    // Create filename for the form basename.YYYY-MM-DD-H
     static filename_t calc_filename(const filename_t &filename, const tm &now_tm) {
         filename_t basename, ext;
-        std::tie(basename, ext) = details::file_helper::split_by_extension(filename);
-        return fmt_lib::format(SPDLOG_FILENAME_T("{}_{:04d}-{:02d}-{:02d}_{:02d}{}"), basename, now_tm.tm_year + 1900,
-                               now_tm.tm_mon + 1, now_tm.tm_mday, now_tm.tm_hour, ext);
+        std::tie(basename, ext) = details::os::split_by_extension(filename);
+        std::basic_ostringstream<filename_t::value_type> oss;        
+        oss << basename.native() << '_' << std::setfill(SPDLOG_FILENAME_T('0')) << std::setw(4) << now_tm.tm_year + 1900 << '-'
+            << std::setw(2) << now_tm.tm_mon + 1 << '-' << std::setw(2) << now_tm.tm_mday << '_' << std::setw(2) << now_tm.tm_hour
+            << ext.native();
+        return oss.str();        
     }
 };
 

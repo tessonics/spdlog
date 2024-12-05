@@ -1,4 +1,4 @@
-//
+﻿//
 // Copyright(c) 2015 Gabi Melman.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
@@ -299,16 +299,16 @@ void custom_flags_example() {
 void file_events_example() {
     // pass the spdlog::file_event_handlers to file sinks for open/close log file notifications
     spdlog::file_event_handlers handlers;
-    handlers.before_open = [](spdlog::filename_t filename) { spdlog::info("Before opening {}", filename); };
-    handlers.after_open = [](spdlog::filename_t filename, std::FILE *fstream) {
-        spdlog::info("After opening {}", filename);
+    handlers.before_open = [](spdlog::filename_t) { spdlog::info("Before opening logfile"); };
+    handlers.after_open = [](spdlog::filename_t, std::FILE *fstream) {
+        spdlog::info("After opening logfile");
         fputs("After opening\n", fstream);
     };
-    handlers.before_close = [](spdlog::filename_t filename, std::FILE *fstream) {
-        spdlog::info("Before closing {}", filename);
+    handlers.before_close = [](spdlog::filename_t, std::FILE *fstream) {
+        spdlog::info("Before closing logfile");
         fputs("Before closing\n", fstream);
     };
-    handlers.after_close = [](spdlog::filename_t filename) { spdlog::info("After closing {}", filename); };
+    handlers.after_close = [](spdlog::filename_t) { spdlog::info("After closing logfile"); };
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/events-sample.txt", true, handlers);
     spdlog::logger my_logger("some_logger", file_sink);
     my_logger.info("Some log line");

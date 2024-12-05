@@ -23,7 +23,6 @@
 #include <cstring>
 #include <ctime>
 #include <string>
-#include <thread>
 
 #include "spdlog/common.h"
 #include "spdlog/details/os.h"
@@ -63,7 +62,7 @@ std::tm gmtime() noexcept {
 }
 
 bool fopen_s(FILE **fp, const filename_t &filename, const filename_t &mode) {
-    *fp = ::_fsopen((filename.c_str()), mode.c_str(), _SH_DENYNO);
+    *fp = ::_wfsopen((filename.c_str()), mode.c_str(), _SH_DENYNO);
 #if defined(SPDLOG_PREVENT_CHILD_FD)
     if (*fp != nullptr) {
         auto file_handle = reinterpret_cast<HANDLE>(_get_osfhandle(::_fileno(*fp)));
@@ -76,19 +75,7 @@ bool fopen_s(FILE **fp, const filename_t &filename, const filename_t &mode) {
     return *fp == nullptr;
 }
 
-int remove(const filename_t &filename) noexcept { return std::remove(filename.c_str()); }
 
-int remove_if_exists(const filename_t &filename) noexcept { return path_exists(filename) ? remove(filename) : 0; }
-
-int rename(const filename_t &filename1, const filename_t &filename2) noexcept {
-    return std::rename(filename1.c_str(), filename2.c_str());
-}
-
-// Return true if path exists (file or directory)
-bool path_exists(const filename_t &filename) noexcept {
-    struct _stat buffer;
-    return (::_stat(filename.c_str(), &buffer) == 0);
-}
 
 #ifdef _MSC_VER
 // avoid warning about unreachable statement at the end of filesize()
@@ -149,16 +136,31 @@ size_t _thread_id() noexcept { return static_cast<size_t>(::GetCurrentThreadId()
 
 // Return current thread id as size_t (from thread local storage)
 size_t thread_id() noexcept {
-    // cache thread id in tls
+#if defined(SPDLOG_NO_TLS)
+    return _thread_id();
+#else  // cache thread id in tls
     static thread_local const size_t tid = _thread_id();
     return tid;
+#endif
 }
 
 // This is avoid msvc issue in sleep_for that happens if the clock changes.
 // See https://github.com/gabime/spdlog/issues/609
 void sleep_for_millis(unsigned int milliseconds) noexcept { ::Sleep(milliseconds); }
 
-std::string filename_to_str(const filename_t &filename) { return filename; }
+// Try tp convert wstring filename to string. Return "???" if failed
+std::string filename_to_str(const filename_t &filename) {
+    static_assert(std::is_same_v<filename_t::value_type, wchar_t>, "filename_t type must be wchar_t");
+    try {        
+        memory_buf_t buf;
+        wstr_to_utf8buf(filename.wstring(), buf);
+        return std::string(buf.data(), buf.size());
+    }
+    catch (...) {
+		return "???";
+	}
+    
+}
 
 int pid() noexcept { return static_cast<int>(::GetCurrentProcessId()); }
 
@@ -193,7 +195,7 @@ void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target) {
         }
     }
 
-    throw_spdlog_ex(fmt_lib::format("WideCharToMultiByte failed. Last error: {}", ::GetLastError()));
+    throw spdlog_ex("WideCharToMultiByte failed");
 }
 
 void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
@@ -222,56 +224,6 @@ void utf8_to_wstrbuf(string_view_t str, wmemory_buf_t &target) {
     throw_spdlog_ex(fmt_lib::format("MultiByteToWideChar failed. Last error: {}", ::GetLastError()));
 }
 
-// return true on success
-static bool mkdir_(const filename_t &path) { return ::_mkdir(path.c_str()) == 0; }
-
-// create the given directory - and all directories leading to it
-// return true on success or if the directory already exists
-bool create_dir(const filename_t &path) {
-    if (path_exists(path)) {
-        return true;
-    }
-
-    if (path.empty()) {
-        return false;
-    }
-
-    size_t search_offset = 0;
-    do {
-        auto token_pos = path.find_first_of(folder_seps_filename, search_offset);
-        // treat the entire path as a folder if no folder separator not found
-        if (token_pos == filename_t::npos) {
-            token_pos = path.size();
-        }
-
-        auto subdir = path.substr(0, token_pos);
-
-        // if subdir is just a drive letter, add a slash e.g. "c:"=>"c:\",
-        // otherwise path_exists(subdir) returns false (issue #3079)
-        const bool is_drive = subdir.length() == 2 && subdir[1] == ':';
-        if (is_drive) {
-            subdir += '\\';
-            token_pos++;
-        }
-
-        if (!subdir.empty() && !path_exists(subdir) && !mkdir_(subdir)) {
-            return false;  // return error if failed creating dir
-        }
-        search_offset = token_pos + 1;
-    } while (search_offset < path.size());
-
-    return true;
-}
-
-// Return directory name from given path or empty string
-// "abc/file" => "abc"
-// "abc/" => "abc"
-// "abc" => ""
-// "abc///" => "abc//"
-filename_t dir_name(const filename_t &path) {
-    auto pos = path.find_last_of(folder_seps_filename);
-    return pos != filename_t::npos ? path.substr(0, pos) : filename_t{};
-}
 
 std::string getenv(const char *field) {
 #if defined(_MSC_VER)

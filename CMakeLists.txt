@@ -86,6 +86,7 @@ endif()
 option(SPDLOG_PREVENT_CHILD_FD "Prevent from child processes to inherit log file descriptors" OFF)
 option(SPDLOG_NO_THREAD_ID "prevent spdlog from querying the thread id on each log call if thread id is not needed" OFF)
 option(SPDLOG_DISABLE_DEFAULT_LOGGER "Disable default logger creation" OFF)
+option(SPDLOG_NO_TLS "Disable thread local storage" OFF)
 
 # clang-tidy
 option(SPDLOG_TIDY "run clang-tidy" OFF)
@@ -198,6 +199,7 @@ set(SPDLOG_SRCS
     "src/spdlog.cpp"
     "src/cfg/helpers.cpp"
     "src/details/file_helper.cpp"
+	"src/details/os_filesystem.cpp"
     "src/details/log_msg.cpp"
     "src/details/log_msg_buffer.cpp"
     "src/details/periodic_worker.cpp"
@@ -307,8 +309,13 @@ endif()
 # ---------------------------------------------------------------------------------------
 # spdlog private defines according to the options
 # ---------------------------------------------------------------------------------------
-foreach(SPDLOG_OPTION SPDLOG_CLOCK_COARSE SPDLOG_PREVENT_CHILD_FD SPDLOG_NO_THREAD_ID SPDLOG_DISABLE_DEFAULT_LOGGER
-                      SPDLOG_FWRITE_UNLOCKED)
+foreach(SPDLOG_OPTION 
+    SPDLOG_CLOCK_COARSE
+    SPDLOG_PREVENT_CHILD_FD
+    SPDLOG_NO_THREAD_ID
+    SPDLOG_DISABLE_DEFAULT_LOGGER
+    SPDLOG_NO_TLS
+    SPDLOG_FWRITE_UNLOCKED)
     if(${SPDLOG_OPTION})
         target_compile_definitions(spdlog PRIVATE ${SPDLOG_OPTION})
     endif()

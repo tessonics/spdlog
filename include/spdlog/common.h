@@ -5,14 +5,14 @@
 
 #include <array>
 #include <atomic>
-#include <chrono>
 #include <cstdio>
 #include <exception>
 #include <functional>
 #include <initializer_list>
 #include <memory>
 #include <string>
-#include <type_traits>
+#include <chrono>
+#include <string_view>
 
 #include "./source_loc.h"
 
@@ -47,9 +47,6 @@ namespace sinks {
 class sink;
 }
 
-using filename_t = std::string;
-#define SPDLOG_FILENAME_T(s) s
-
 using log_clock = std::chrono::system_clock;
 using sink_ptr = std::shared_ptr<sinks::sink>;
 using sinks_init_list = std::initializer_list<sink_ptr>;
@@ -64,7 +61,6 @@ using wmemory_buf_t = fmt::basic_memory_buffer<wchar_t, 250>;
 template <typename... Args>
 using format_string_t = fmt::format_string<Args...>;
 
-#define SPDLOG_BUF_TO_STRING(x) fmt::to_string(x)
 #define SPDLOG_LEVEL_TRACE 0
 #define SPDLOG_LEVEL_DEBUG 1
 #define SPDLOG_LEVEL_INFO 2
@@ -102,7 +98,7 @@ constexpr std::array<std::string_view, levels_count> short_level_names{"T", "D",
     return level_string_views.at(level_to_number(lvl));
 }
 
-[[nodiscard]] constexpr const std::string_view to_short_string_view(spdlog::level lvl) noexcept {
+[[nodiscard]] constexpr std::string_view to_short_string_view(spdlog::level lvl) noexcept {
     return short_level_names.at(level_to_number(lvl));
 }
 
@@ -140,33 +136,4 @@ private:
 [[noreturn]] SPDLOG_API void throw_spdlog_ex(const std::string &msg, int last_errno);
 [[noreturn]] SPDLOG_API void throw_spdlog_ex(std::string msg);
 
-struct file_event_handlers {
-    file_event_handlers()
-        : before_open(nullptr),
-          after_open(nullptr),
-          before_close(nullptr),
-          after_close(nullptr) {}
-
-    std::function<void(const filename_t &filename)> before_open;
-    std::function<void(const filename_t &filename, std::FILE *file_stream)> after_open;
-    std::function<void(const filename_t &filename, std::FILE *file_stream)> before_close;
-    std::function<void(const filename_t &filename)> after_close;
-};
-
-namespace details {
-
-// to_string_view
-
-[[nodiscard]] constexpr spdlog::string_view_t to_string_view(const memory_buf_t &buf) noexcept {
-    return spdlog::string_view_t{buf.data(), buf.size()};
-}
-
-[[nodiscard]] constexpr spdlog::string_view_t to_string_view(spdlog::string_view_t str) noexcept { return str; }
-
-template <typename T, typename... Args>
-[[nodiscard]] constexpr fmt::basic_string_view<T> to_string_view(fmt::basic_format_string<T, Args...> fmt) noexcept {
-    return fmt;
-}
-
-}  // namespace details
 }  // namespace spdlog
