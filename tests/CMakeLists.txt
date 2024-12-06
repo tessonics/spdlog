@@ -34,8 +34,7 @@ set(SPDLOG_UTESTS_SOURCES
     test_misc.cpp
     test_pattern_formatter.cpp
     test_async.cpp
-    test_registry.cpp
-    test_macros.cpp
+        test_macros.cpp
     utils.cpp
     main.cpp
     test_mpmc_q.cpp
@@ -44,8 +43,7 @@ set(SPDLOG_UTESTS_SOURCES
     test_stdout_api.cpp
     test_create_dir.cpp
     test_custom_callbacks.cpp
-    test_cfg.cpp
-    test_time_point.cpp
+        test_time_point.cpp
     test_stopwatch.cpp
     test_circular_q.cpp
     test_ringbuffer_sink.cpp

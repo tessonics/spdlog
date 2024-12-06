@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright(c) 2015 Gabi Melman.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
@@ -7,7 +7,6 @@
 #include <chrono>
 #include <cstdio>
 
-void load_levels_example();
 void stdout_logger_example();
 void basic_example();
 void rotating_example();
@@ -25,16 +24,12 @@ void syslog_example();
 void udp_example();
 void custom_flags_example();
 void file_events_example();
-void replace_default_logger_example();
+void replace_global_logger_example();
 
-#include "spdlog/cfg/env.h"  // support for loading levels from the environment variable
 #include "spdlog/spdlog.h"
 #include "spdlog/version.h"
 
 int main(int, char *[]) {
-    // Log levels can be loaded from argv/env using "SPDLOG_LEVEL"
-    load_levels_example();
-    SPDLOG_INFO("This message should be displayed..");
     spdlog::info("Welcome to spdlog version {}.{}.{} !", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR, SPDLOG_VER_PATCH);
     spdlog::warn("Easy padding in numbers like {:08d}", 12);
     spdlog::critical("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
@@ -71,16 +66,9 @@ int main(int, char *[]) {
         udp_example();
         custom_flags_example();
         file_events_example();
-        replace_default_logger_example();
+        replace_global_logger_example();
 
-        // Flush all *registered* loggers using a worker thread every 3 seconds.
-        // note: registered loggers *must* be thread safe for this to work correctly!
-        spdlog::flush_every(std::chrono::seconds(3));
-
-        // Apply some function on all registered loggers
-        spdlog::apply_all([&](std::shared_ptr<spdlog::logger> l) { l->info("End of example."); });
-
-        // Release all spdlog resources, and drop all loggers in the registry.
+        // Release all spdlog resources
         // This is optional (only mandatory if using windows + async log).
         spdlog::shutdown();
     }
@@ -125,17 +113,6 @@ void callback_example() {
     auto logger = spdlog::callback_logger_mt("custom_callback_logger", [](const spdlog::details::log_msg & /*msg*/) {
         // do what you need to do with msg
     });
-}
-
-void load_levels_example() {
-    // Set the log level to "info" and mylogger to "trace":
-    // SPDLOG_LEVEL=info,mylogger=trace && ./example
-    // must #include "spdlog/cfg/env.h"
-    spdlog::cfg::load_env_levels();
-    // or from command line:
-    // ./example SPDLOG_LEVEL=info,mylogger=trace
-    // #include "spdlog/cfg/argv.h" // for loading levels from argv
-    // spdlog::cfg::load_argv_levels(args, argv);
 }
 
 #include "spdlog/async.h"
@@ -188,14 +165,10 @@ void vector_example() {
 // Compile time log levels.
 // define SPDLOG_ACTIVE_LEVEL to required level (e.g. SPDLOG_LEVEL_TRACE)
 void trace_example() {
-    // trace from default logger
+    // trace from global logger
     SPDLOG_TRACE("Some trace message.. {} ,{}", 1, 3.23);
-    // debug from default logger
+    // debug from global logger
     SPDLOG_DEBUG("Some debug message.. {} ,{}", 1, 3.23);
-
-    // trace from logger object
-    auto logger = spdlog::get("file_logger");
-    SPDLOG_LOGGER_TRACE(logger, "another trace message");
 }
 
 // stopwatch example
@@ -299,30 +272,30 @@ void custom_flags_example() {
 void file_events_example() {
     // pass the spdlog::file_event_handlers to file sinks for open/close log file notifications
     spdlog::file_event_handlers handlers;
-    handlers.before_open = [](spdlog::filename_t) { spdlog::info("Before opening logfile"); };
+    handlers.before_open = [](spdlog::filename_t) { spdlog::trace("Before opening logfile"); };
     handlers.after_open = [](spdlog::filename_t, std::FILE *fstream) {
-        spdlog::info("After opening logfile");
+        spdlog::trace("After opening logfile");
         fputs("After opening\n", fstream);
     };
     handlers.before_close = [](spdlog::filename_t, std::FILE *fstream) {
-        spdlog::info("Before closing logfile");
+        spdlog::trace("Before closing logfile");
         fputs("Before closing\n", fstream);
     };
-    handlers.after_close = [](spdlog::filename_t) { spdlog::info("After closing logfile"); };
+    handlers.after_close = [](spdlog::filename_t) { spdlog::trace("After closing logfile"); };
     auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/events-sample.txt", true, handlers);
     spdlog::logger my_logger("some_logger", file_sink);
-    my_logger.info("Some log line");
+    my_logger.trace("Some log line");
 }
 
-void replace_default_logger_example() {
+void replace_global_logger_example() {
     // store the old logger so we don't break other examples.
-    auto old_logger = spdlog::default_logger();
+    auto old_logger = spdlog::global_logger();
 
-    auto new_logger = spdlog::basic_logger_mt("new_default_logger", "logs/new-default-log.txt", true);
-    spdlog::set_default_logger(new_logger);
+    auto new_logger = spdlog::basic_logger_mt("new_global_logger", "logs/new-default-log.txt", true);
+    spdlog::set_global_logger(new_logger);
     spdlog::set_level(spdlog::level::info);
     spdlog::debug("This message should not be displayed!");
     spdlog::set_level(spdlog::level::trace);
     spdlog::debug("This message should be displayed..");
-    spdlog::set_default_logger(old_logger);
+    spdlog::set_global_logger(old_logger);
 }

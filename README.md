@@ -196,18 +196,6 @@ void binary_example()
 ```
 
 ---
-#### Mapped diagnostic context (MDC)
-MDC is a map of contextual information that can be used to enrich log messages.
-It is a map of key-value pairs that can be set on a per-thread basis since it is stored in thread-local storage.
-```c++
-#include "spdlog/spdlog.h"
-#include "spdlog/mdc"
-...
-spdlog::mdc::put("key1", "value1");
-spdlog::mdc::put("key2", "value2");
-```
-
----
 #### Logger with multi sinks - each with a different format and log level
 ```c++
 
@@ -410,10 +398,10 @@ void file_events_example()
 ---
 #### Replace the Default Logger
 ```c++
-void replace_default_logger_example()
+void replace_global_logger_example()
 {
-    auto new_logger = spdlog::basic_logger_mt("new_default_logger", "logs/new-default-log.txt", true);
-    spdlog::set_default_logger(new_logger);
+    auto new_logger = spdlog::basic_logger_mt("new_global_logger", "logs/new-default-log.txt", true);
+    spdlog::set_global_logger(new_logger);
     spdlog::info("new logger log message");
 }
 ```

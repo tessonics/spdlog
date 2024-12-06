@@ -73,18 +73,6 @@ TEST_CASE("to_level_enum", "[convert_to_level_enum]") {
     REQUIRE(spdlog::level_from_str("null") == spdlog::level::off);
 }
 
-TEST_CASE("periodic flush", "[periodic_flush]") {
-    using spdlog::sinks::test_sink_mt;
-    auto logger = spdlog::create<test_sink_mt>("periodic_flush");
-    auto test_sink = std::static_pointer_cast<test_sink_mt>(logger->sinks()[0]);
-
-    spdlog::flush_every(std::chrono::seconds(1));
-    std::this_thread::sleep_for(std::chrono::milliseconds(1250));
-    REQUIRE(test_sink->flush_counter() == 1);
-    spdlog::flush_every(std::chrono::seconds(0));
-    spdlog::drop_all();
-}
-
 TEST_CASE("clone-logger", "[clone]") {
     using spdlog::sinks::test_sink_mt;
     auto test_sink = std::make_shared<test_sink_mt>();
@@ -102,8 +90,6 @@ TEST_CASE("clone-logger", "[clone]") {
     REQUIRE(test_sink->lines().size() == 2);
     REQUIRE(test_sink->lines()[0] == "Some message 1");
     REQUIRE(test_sink->lines()[1] == "Some message 2");
-
-    spdlog::drop_all();
 }
 
 TEST_CASE("clone async", "[clone]") {
@@ -127,18 +113,16 @@ TEST_CASE("clone async", "[clone]") {
     REQUIRE(test_sink->lines().size() == 2);
     REQUIRE(test_sink->lines()[0] == "Some message 1");
     REQUIRE(test_sink->lines()[1] == "Some message 2");
-
-    spdlog::drop_all();
 }
 
-TEST_CASE("default logger API", "[default logger]") {
+TEST_CASE("global logger API", "[global logger]") {
     std::ostringstream oss;
     auto oss_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
 
-    spdlog::set_default_logger(std::make_shared<spdlog::logger>("oss", oss_sink));
+    spdlog::set_global_logger(std::make_shared<spdlog::logger>("oss", oss_sink));
     spdlog::set_pattern("*** %v");
 
-    spdlog::default_logger()->set_level(spdlog::level::trace);
+    spdlog::global_logger()->set_level(spdlog::level::trace);
     spdlog::trace("hello trace");
     REQUIRE(oss.str() == "*** hello trace" + std::string(spdlog::details::os::default_eol));
 
@@ -162,7 +146,6 @@ TEST_CASE("default logger API", "[default logger]") {
     spdlog::set_level(spdlog::level::info);
     spdlog::debug("should not be logged");
     REQUIRE(oss.str().empty());
-    spdlog::drop_all();
     spdlog::set_pattern("%v");
 }
 

@@ -3,6 +3,7 @@
 
 #include "spdlog/spdlog.h"
 
+#include <cassert>
 #include <memory>
 
 #include "spdlog/common.h"
@@ -12,55 +13,45 @@
 
 namespace spdlog {
 
-void initialize_logger(std::shared_ptr<logger> logger) { details::registry::instance().initialize_logger(std::move(logger)); }
+static std::shared_ptr s_context =
+#ifndef SPDLOG_DISABLE_GLOBAL_LOGGER
+    std::make_unique<details::context>(std::make_unique<logger>(std::string(), std::make_unique<sinks::stdout_color_sink_mt>()));
+#else
+    std::make_unique<details::context>();  // empty context
+#endif
 
-std::shared_ptr<logger> get(const std::string &name) { return details::registry::instance().get(name); }
+void set_context(std::shared_ptr<details::context> context) { s_context = std::move(context); }
 
-std::shared_ptr<logger> get(std::string_view name) { return details::registry::instance().get(name); }
+std::shared_ptr<details::context> context() { return s_context; }
 
-std::shared_ptr<logger> get(const char *name) { return details::registry::instance().get(name); }
+const std::shared_ptr<details::context> &context_ref() { return s_context; }
 
-void set_formatter(std::unique_ptr<spdlog::formatter> formatter) {
-    details::registry::instance().set_formatter(std::move(formatter));
+std::shared_ptr<logger> global_logger() { return context_ref()->global_logger(); }
+
+void set_global_logger(std::shared_ptr<logger> global_logger) { context()->set_logger(std::move(global_logger)); }
+
+logger *global_logger_raw() noexcept {
+    auto *rv = context_ref()->global_logger_raw();
+    assert(rv != nullptr);
+    return rv;
 }
+
+void set_formatter(std::unique_ptr<formatter> formatter) { global_logger()->set_formatter(std::move(formatter)); }
 
 void set_pattern(std::string pattern, pattern_time_type time_type) {
-    set_formatter(std::make_unique<spdlog::pattern_formatter>(std::move(pattern), time_type));
+    set_formatter(std::make_unique<pattern_formatter>(std::move(pattern), time_type));
 }
 
-level get_level() { return default_logger_raw()->log_level(); }
+level get_level() { return global_logger()->log_level(); }
 
-bool should_log(level level) { return default_logger_raw()->should_log(level); }
+bool should_log(level level) { return global_logger()->should_log(level); }
 
-void set_level(level level) { details::registry::instance().set_level(level); }
+void set_level(level level) { global_logger()->set_level(level); }
 
-void flush_on(level level) { details::registry::instance().flush_on(level); }
+void flush_on(level level) { global_logger()->flush_on(level); }
 
-void set_error_handler(void (*handler)(const std::string &msg)) { details::registry::instance().set_error_handler(handler); }
+void set_error_handler(void (*handler)(const std::string &msg)) { global_logger()->set_error_handler(handler); }
 
-void register_logger(std::shared_ptr<logger> logger) { details::registry::instance().register_logger(std::move(logger)); }
+void shutdown() { s_context.reset(); }
 
-void apply_all(const std::function<void(std::shared_ptr<logger>)> &fun) { details::registry::instance().apply_all(fun); }
-
-void drop(const std::string &name) { details::registry::instance().drop(name); }
-
-void drop_all() { details::registry::instance().drop_all(); }
-
-void shutdown() { details::registry::instance().shutdown(); }
-
-void set_automatic_registration(bool automatic_registration) {
-    details::registry::instance().set_automatic_registration(automatic_registration);
-}
-
-std::shared_ptr<spdlog::logger> default_logger() { return details::registry::instance().default_logger(); }
-
-spdlog::logger *default_logger_raw() { return details::registry::instance().get_default_raw(); }
-
-void set_default_logger(std::shared_ptr<spdlog::logger> default_logger) {
-    details::registry::instance().set_default_logger(std::move(default_logger));
-}
-
-void apply_logger_env_levels(std::shared_ptr<logger> logger) {
-    details::registry::instance().apply_logger_env_levels(std::move(logger));
-}
 }  // namespace spdlog

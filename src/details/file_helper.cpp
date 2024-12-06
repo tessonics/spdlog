@@ -1,13 +1,13 @@
 // Copyright(c) 2015-present, Gabi Melman & spdlog contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
+#include "spdlog/details/file_helper.h"
 
 #include <cerrno>
 #include <cstdio>
-#include <utility>
 #include <filesystem>
+#include <utility>
 
-#include "spdlog/details/file_helper.h"
 #include "spdlog/common.h"
 #include "spdlog/details/os.h"
 
@@ -29,9 +29,11 @@ void file_helper::open(const filename_t &fname, bool truncate) {
     if (event_handlers_.before_open) {
         event_handlers_.before_open(filename_);
     }
+
+    // create containing folder if not exists already.
+    os::create_dir(os::dir_name(fname));
+
     for (int tries = 0; tries < open_tries_; ++tries) {
-        // create containing folder if not exists already.
-        os::create_dir(os::dir_name(fname));
         if (truncate) {
             // Truncate by opening-and-closing a tmp file in "wb" mode, always
             // opening the actual log-we-write-to in "ab" mode, since that
@@ -107,7 +109,6 @@ size_t file_helper::size() const {
 }
 
 const filename_t &file_helper::filename() const { return filename_; }
-
 
 }  // namespace details
 }  // namespace spdlog

@@ -77,8 +77,7 @@ void bench_single_threaded(int iters) {
 }
 
 int main(int argc, char *argv[]) {
-    spdlog::set_automatic_registration(false);
-    spdlog::default_logger()->set_pattern("[%^%l%$] %v");
+    spdlog::global_logger()->set_pattern("[%^%l%$] %v");
     int iters = 250000;
     size_t threads = 4;
     try {
@@ -117,8 +116,7 @@ void bench(int howmany, std::shared_ptr<spdlog::logger> log) {
     auto delta_d = duration_cast<duration<double>>(delta).count();
 
     spdlog::info(spdlog::fmt_lib::format(std::locale("en_US.UTF-8"), "{:<30} Elapsed: {:0.2f} secs {:>16L}/sec", log->name(),
-                                         delta_d, size_t(howmany / delta_d)));
-    spdlog::drop(log->name());
+                                         delta_d, static_cast<size_t>(howmany / delta_d)));
 }
 
 void bench_mt(int howmany, std::shared_ptr<spdlog::logger> log, size_t thread_count) {
@@ -144,8 +142,7 @@ void bench_mt(int howmany, std::shared_ptr<spdlog::logger> log, size_t thread_co
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
     spdlog::info(spdlog::fmt_lib::format(std::locale("en_US.UTF-8"), "{:<30} Elapsed: {:0.2f} secs {:>16L}/sec", log->name(),
-                                         delta_d, size_t(howmany / delta_d)));
-    spdlog::drop(log->name());
+                                         delta_d, static_cast<size_t>(howmany / delta_d)));
 }
 
 /*
@@ -155,8 +152,8 @@ void bench_default_api(int howmany, std::shared_ptr<spdlog::logger> log)
     using std::chrono::duration;
     using std::chrono::duration_cast;
 
-    auto orig_default = spdlog::default_logger();
-    spdlog::set_default_logger(log);
+    auto orig_default = spdlog::global_logger();
+    spdlog::set_global_logger(log);
     auto start = high_resolution_clock::now();
     for (auto i = 0; i < howmany; ++i)
     {
@@ -166,7 +163,7 @@ void bench_default_api(int howmany, std::shared_ptr<spdlog::logger> log)
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
     spdlog::drop(log->name());
-    spdlog::set_default_logger(std::move(orig_default));
+    spdlog::set_global_logger(std::move(orig_default));
     spdlog::info("{:<30} Elapsed: {:0.2f} secs {:>16}/sec", log->name(), delta_d, int(howmany /
 delta_d));
 }
@@ -184,8 +181,8 @@ non dapibus eros. Donec fringilla dui sed " "augue pretium, nec scelerisque est 
 convallis, sem nec blandit maximus, nisi turpis ornare " "nisl, sit amet volutpat neque massa eu
 odio. Maecenas malesuada quam ex, posuere congue nibh turpis duis.";
 
-    auto orig_default = spdlog::default_logger();
-    spdlog::set_default_logger(log);
+    auto orig_default = spdlog::global_logger();
+    spdlog::set_global_logger(log);
     auto start = high_resolution_clock::now();
     for (auto i = 0; i < howmany; ++i)
     {
@@ -195,7 +192,7 @@ odio. Maecenas malesuada quam ex, posuere congue nibh turpis duis.";
     auto delta = high_resolution_clock::now() - start;
     auto delta_d = duration_cast<duration<double>>(delta).count();
     spdlog::drop(log->name());
-    spdlog::set_default_logger(std::move(orig_default));
+    spdlog::set_global_logger(std::move(orig_default));
     spdlog::info("{:<30} Elapsed: {:0.2f} secs {:>16}/sec", log->name(), delta_d, int(howmany /
 delta_d));
 }

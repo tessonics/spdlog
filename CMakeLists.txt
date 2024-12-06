@@ -85,7 +85,7 @@ endif()
 
 option(SPDLOG_PREVENT_CHILD_FD "Prevent from child processes to inherit log file descriptors" OFF)
 option(SPDLOG_NO_THREAD_ID "prevent spdlog from querying the thread id on each log call if thread id is not needed" OFF)
-option(SPDLOG_DISABLE_DEFAULT_LOGGER "Disable default logger creation" OFF)
+option(SPDLOG_DISABLE_GLOBAL_LOGGER "Disable global logger creation" OFF)
 option(SPDLOG_NO_TLS "Disable thread local storage" OFF)
 
 # clang-tidy
@@ -150,9 +150,6 @@ set(SPDLOG_HEADERS
     "include/spdlog/spdlog.h"
     "include/spdlog/stopwatch.h"
     "include/spdlog/version.h"
-    "include/spdlog/cfg/argv.h"
-    "include/spdlog/cfg/env.h"
-    "include/spdlog/cfg/helpers.h"
     "include/spdlog/details/circular_q.h"
     "include/spdlog/details/file_helper.h"
     "include/spdlog/details/fmt_helper.h"
@@ -162,7 +159,7 @@ set(SPDLOG_HEADERS
     "include/spdlog/details/null_mutex.h"
     "include/spdlog/details/os.h"
     "include/spdlog/details/periodic_worker.h"
-    "include/spdlog/details/registry.h"
+    "include/spdlog/details/context.h"
     "include/spdlog/details/synchronous_factory.h"
     "include/spdlog/details/thread_pool.h"
     "include/spdlog/fmt/bin_to_hex.h"
@@ -197,13 +194,11 @@ set(SPDLOG_SRCS
     "src/logger.cpp"
     "src/pattern_formatter.cpp"
     "src/spdlog.cpp"
-    "src/cfg/helpers.cpp"
     "src/details/file_helper.cpp"
 	"src/details/os_filesystem.cpp"
     "src/details/log_msg.cpp"
     "src/details/log_msg_buffer.cpp"
-    "src/details/periodic_worker.cpp"
-    "src/details/registry.cpp"
+        "src/details/context.cpp"
     "src/details/thread_pool.cpp"
     "src/sinks/base_sink.cpp"
     "src/sinks/basic_file_sink.cpp"
@@ -309,11 +304,11 @@ endif()
 # ---------------------------------------------------------------------------------------
 # spdlog private defines according to the options
 # ---------------------------------------------------------------------------------------
-foreach(SPDLOG_OPTION 
+foreach(SPDLOG_OPTION
     SPDLOG_CLOCK_COARSE
     SPDLOG_PREVENT_CHILD_FD
     SPDLOG_NO_THREAD_ID
-    SPDLOG_DISABLE_DEFAULT_LOGGER
+    SPDLOG_DISABLE_GLOBAL_LOGGER
     SPDLOG_NO_TLS
     SPDLOG_FWRITE_UNLOCKED)
     if(${SPDLOG_OPTION})
