@@ -5,12 +5,10 @@
 #include "spdlog/details/windows_include.h"
 #include <wincon.h>
 #include <mutex>
+
 // clang-format on
-
 #include "spdlog/sinks/wincolor_sink.h"
-
 #include "spdlog/common.h"
-#include "spdlog/details/null_mutex.h"
 
 namespace spdlog {
 namespace sinks {
@@ -132,15 +130,14 @@ wincolor_stdout_sink<Mutex>::wincolor_stdout_sink(color_mode mode)
 template <typename Mutex>
 wincolor_stderr_sink<Mutex>::wincolor_stderr_sink(color_mode mode)
     : wincolor_sink<Mutex>(::GetStdHandle(STD_ERROR_HANDLE), mode) {}
+
+
 }  // namespace sinks
 }  // namespace spdlog
 
 // template instantiations
-template class SPDLOG_API spdlog::sinks::wincolor_sink<std::mutex>;
-template class SPDLOG_API spdlog::sinks::wincolor_sink<spdlog::details::null_mutex>;
-
+#include "spdlog/details/null_mutex.h"
 template class SPDLOG_API spdlog::sinks::wincolor_stdout_sink<std::mutex>;
 template class SPDLOG_API spdlog::sinks::wincolor_stdout_sink<spdlog::details::null_mutex>;
-
 template class SPDLOG_API spdlog::sinks::wincolor_stderr_sink<std::mutex>;
 template class SPDLOG_API spdlog::sinks::wincolor_stderr_sink<spdlog::details::null_mutex>;

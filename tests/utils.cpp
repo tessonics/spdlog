@@ -4,7 +4,6 @@
     #include <windows.h>
 #else
     #include <dirent.h>
-    #include <sys/types.h>
 #endif
 
 void prepare_logdir() {
@@ -18,7 +17,7 @@ void prepare_logdir() {
 #endif
 }
 
-std::string file_contents(const std::string &filename) {
+std::string file_contents(const std::filesystem::path &filename) {
     std::ifstream ifs(filename, std::ios_base::binary);
     if (!ifs) {
         throw std::runtime_error("Failed open file ");
@@ -26,7 +25,7 @@ std::string file_contents(const std::string &filename) {
     return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 }
 
-std::size_t count_lines(const spdlog::filename_t &filename) {
+std::size_t count_lines(const std::filesystem::path &filename) {
     std::ifstream ifs(filename);
     if (!ifs) {
         throw std::runtime_error("Failed open file ");
@@ -52,7 +51,7 @@ std::size_t get_filesize(const std::string &filename) {
         throw std::runtime_error("Failed open file ");
     }
 
-    return static_cast<std::size_t>(ifs.tellg());
+    return static_cast<size_t>(ifs.tellg());
 }
 
 // source: https://stackoverflow.com/a/2072890/192001
@@ -72,7 +71,7 @@ std::size_t count_files(const std::string &folder) {
     // Start iterating over the files in the folder directory.
     HANDLE hFind = ::FindFirstFileA((folder + "\\*").c_str(), &ffd);
     if (hFind != INVALID_HANDLE_VALUE) {
-        do  // Managed to locate and create an handle to that folder.
+        do  // Managed to locate and create a handle to that folder.
         {
             if (ffd.cFileName[0] != '.') counter++;
         } while (::FindNextFileA(hFind, &ffd) != 0);

@@ -24,14 +24,14 @@ class dist_sink : public base_sink<Mutex> {
 public:
     dist_sink() = default;
     explicit dist_sink(std::vector<std::shared_ptr<sink>> sinks)
-        : sinks_(sinks) {}
+        : sinks_(std::move(sinks)) {}
 
     dist_sink(const dist_sink &) = delete;
     dist_sink &operator=(const dist_sink &) = delete;
 
     void add_sink(std::shared_ptr<sink> sub_sink) {
         std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
-        sinks_.push_back(sub_sink);
+        sinks_.push_back(std::move(sub_sink));
     }
 
     void remove_sink(std::shared_ptr<sink> sub_sink) {
@@ -48,7 +48,7 @@ public:
 
 protected:
     void sink_it_(const details::log_msg &msg) override {
-        for (auto &sub_sink : sinks_) {
+        for (const auto &sub_sink : sinks_) {
             if (sub_sink->should_log(msg.log_level)) {
                 sub_sink->log(msg);
             }

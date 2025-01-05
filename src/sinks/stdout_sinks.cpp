@@ -4,6 +4,7 @@
 #include "spdlog/sinks/stdout_sinks.h"
 
 #include <memory>
+#include <mutex>
 
 #include "spdlog/details/os.h"
 #include "spdlog/pattern_formatter.h"
@@ -82,55 +83,11 @@ stderr_sink<Mutex>::stderr_sink()
     : stdout_sink_base<Mutex>(stderr) {}
 
 }  // namespace sinks
-
-// factory methods
-template <typename Factory>
-std::shared_ptr<logger> stdout_logger_mt(const std::string &logger_name) {
-    return Factory::template create<sinks::stdout_sink_mt>(logger_name);
-}
-
-template <typename Factory>
-std::shared_ptr<logger> stdout_logger_st(const std::string &logger_name) {
-    return Factory::template create<sinks::stdout_sink_st>(logger_name);
-}
-
-template <typename Factory>
-std::shared_ptr<logger> stderr_logger_mt(const std::string &logger_name) {
-    return Factory::template create<sinks::stderr_sink_mt>(logger_name);
-}
-
-template <typename Factory>
-std::shared_ptr<logger> stderr_logger_st(const std::string &logger_name) {
-    return Factory::template create<sinks::stderr_sink_st>(logger_name);
-}
 }  // namespace spdlog
 
-// template instantiations for stdout/stderr loggers
-template class SPDLOG_API spdlog::sinks::stdout_sink_base<std::mutex>;
-template class SPDLOG_API spdlog::sinks::stdout_sink_base<spdlog::details::null_mutex>;
+// template instantiations
+#include "spdlog/details/null_mutex.h"
 template class SPDLOG_API spdlog::sinks::stdout_sink<std::mutex>;
 template class SPDLOG_API spdlog::sinks::stdout_sink<spdlog::details::null_mutex>;
 template class SPDLOG_API spdlog::sinks::stderr_sink<std::mutex>;
 template class SPDLOG_API spdlog::sinks::stderr_sink<spdlog::details::null_mutex>;
-
-// template instantiations for stdout/stderr factory functions
-#include "spdlog/async.h"
-#include "spdlog/details/synchronous_factory.h"
-
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stdout_logger_mt<spdlog::synchronous_factory>(
-    const std::string &logger_name);
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stdout_logger_st<spdlog::synchronous_factory>(
-    const std::string &logger_name);
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stderr_logger_mt<spdlog::synchronous_factory>(
-    const std::string &logger_name);
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stderr_logger_st<spdlog::synchronous_factory>(
-    const std::string &logger_name);
-
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stdout_logger_mt<spdlog::async_factory>(
-    const std::string &logger_name);
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stdout_logger_st<spdlog::async_factory>(
-    const std::string &logger_name);
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stderr_logger_mt<spdlog::async_factory>(
-    const std::string &logger_name);
-template SPDLOG_API std::shared_ptr<spdlog::logger> spdlog::stderr_logger_st<spdlog::async_factory>(
-    const std::string &logger_name);

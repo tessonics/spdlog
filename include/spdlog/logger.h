@@ -3,37 +3,22 @@
 
 #pragma once
 
-// Thread safe logger (except for set_error_handler())
-// Has name, log level, vector of std::shared sink pointers and formatter
-// Upon each log write the logger:
-// 1. Checks if its log level is enough to log the message and if yes:
-// 2. Call the underlying sinks to do the job.
-// 3. Each sink use its own private copy of a formatter to format the message
-// and send to its destination.
-//
-// The use of private formatter per sink provides the opportunity to cache some
-// formatted data, and support for different format per sink.
+// Thread-safe logger, with exceptions for these non-thread-safe methods:
+//   set_pattern()       - Modifies the log pattern.
+//   set_formatter()     - Sets a new formatter.
+//   set_error_handler() - Assigns a new error handler.
+//   sinks() (non-const) - Accesses and potentially modifies the sinks directly.
+// By default, the logger does not throw exceptions during logging.
+// To enable exception throwing for logging errors, set a custom error handler.
 
 #include <cassert>
 #include <iterator>
 #include <vector>
 
-#include "./common.h"
-#include "./details/log_msg.h"
-#include "./sinks/sink.h"
-
-#define SPDLOG_LOGGER_CATCH(location)                                                                                     \
-    catch (const std::exception &ex) {                                                                                    \
-        if (!location.empty()) {                                                                                          \
-            err_handler_(fmt_lib::format(SPDLOG_FMT_STRING("{} [{}({})]"), ex.what(), location.filename, location.line)); \
-        } else {                                                                                                          \
-            err_handler_(ex.what());                                                                                      \
-        }                                                                                                                 \
-    }                                                                                                                     \
-    catch (...) {                                                                                                         \
-        err_handler_("Rethrowing unknown exception in logger");                                                           \
-        throw;                                                                                                            \
-    }
+#include "common.h"
+#include "details/err_helper.h"
+#include "details/log_msg.h"
+#include "sinks/sink.h"
 
 namespace spdlog {
 
@@ -60,7 +45,7 @@ public:
     logger(const logger &other) noexcept;
     logger(logger &&other) noexcept;
 
-    virtual ~logger() = default;
+    ~logger() = default;
 
     template <typename... Args>
     void log(source_loc loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
@@ -168,14 +153,14 @@ public:
     void set_error_handler(err_handler);
 
     // create new logger with same sinks and configuration.
-    virtual std::shared_ptr<logger> clone(std::string logger_name);
+    std::shared_ptr<logger> clone(std::string logger_name);
 
-protected:
+private:
     std::string name_;
     std::vector<sink_ptr> sinks_;
-    spdlog::atomic_level_t level_{level::info};
-    spdlog::atomic_level_t flush_level_{level::off};
-    err_handler custom_err_handler_{nullptr};
+    atomic_level_t level_{level::info};
+    atomic_level_t flush_level_{level::off};
+    details::err_helper err_helper_;
 
     // common implementation for after templated public api has been resolved to format string and
     // args
@@ -186,19 +171,25 @@ protected:
             memory_buf_t buf;
             fmt::vformat_to(std::back_inserter(buf), format_string, fmt::make_format_args(args...));
             sink_it_(details::log_msg(loc, name_, lvl, string_view_t(buf.data(), buf.size())));
+        } catch (const std::exception &ex) {
+            err_helper_.handle_ex(name_, loc, ex);
+        } catch (...) {
+            err_helper_.handle_unknown_ex(name_, loc);
         }
-        SPDLOG_LOGGER_CATCH(loc)
     }
 
     // log the given message (if the given log level is high enough)
-    virtual void sink_it_(const details::log_msg &msg) {
+    void sink_it_(const details::log_msg &msg) {
         assert(should_log(msg.log_level));
         for (auto &sink : sinks_) {
             if (sink->should_log(msg.log_level)) {
                 try {
                     sink->log(msg);
+                } catch (const std::exception &ex) {
+                    err_helper_.handle_ex(name_, msg.source, ex);
+                } catch (...) {
+                    err_helper_.handle_unknown_ex(name_, msg.source);
                 }
-                SPDLOG_LOGGER_CATCH(msg.source)
             }
         }
 
@@ -206,12 +197,8 @@ protected:
             flush_();
         }
     }
-    virtual void flush_();
+    void flush_();
     [[nodiscard]] bool should_flush_(const details::log_msg &msg) const;
-
-    // handle errors during logging.
-    // default handler prints the error to stderr at max rate of 1 message/sec.
-    void err_handler_(const std::string &msg);
 };
 
 }  // namespace spdlog
