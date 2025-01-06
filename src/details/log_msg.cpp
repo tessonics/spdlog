@@ -8,12 +8,12 @@
 namespace spdlog {
 namespace details {
 
-log_msg::log_msg(spdlog::log_clock::time_point log_time,
-                 spdlog::source_loc loc,
-                 string_view_t a_logger_name,
-                 spdlog::level lvl,
-                 spdlog::string_view_t msg)
-    : logger_name(a_logger_name),
+log_msg::log_msg(const log_clock::time_point log_time,
+                 const source_loc &loc,
+                 const string_view_t logger_name,
+                 const level lvl,
+                 const string_view_t msg)
+    : logger_name(logger_name),
       log_level(lvl),
       time(log_time),
 #ifdef SPDLOG_NO_THREAD_ID
@@ -25,11 +25,11 @@ log_msg::log_msg(spdlog::log_clock::time_point log_time,
       payload(msg) {
 }
 
-log_msg::log_msg(spdlog::source_loc loc, string_view_t a_logger_name, spdlog::level lvl, spdlog::string_view_t msg)
-    : log_msg(os::now(), loc, a_logger_name, lvl, msg) {}
+log_msg::log_msg(const source_loc &loc, const string_view_t logger_name, const level lvl, const string_view_t msg)
+    : log_msg(os::now(), loc, logger_name, lvl, msg) {}
 
-log_msg::log_msg(string_view_t a_logger_name, spdlog::level lvl, spdlog::string_view_t msg)
-    : log_msg(os::now(), source_loc{}, a_logger_name, lvl, msg) {}
+log_msg::log_msg(const string_view_t logger_name, const level lvl, const string_view_t msg)
+    : log_msg(os::now(), source_loc{}, logger_name, lvl, msg) {}
 
 }  // namespace details
 }  // namespace spdlog
