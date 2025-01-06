@@ -27,7 +27,7 @@ void logger::set_level(level level) { level_.store(level); }
 
 level logger::log_level() const noexcept { return level_.load(std::memory_order_relaxed); }
 
-const std::string &logger::name() const { return name_; }
+const std::string &logger::name() const noexcept { return name_; }
 
 // set formatting for the sinks in this logger.
 // each sink will get a separate instance of the formatter object.
@@ -70,7 +70,7 @@ std::shared_ptr<logger> logger::clone(std::string logger_name) {
 }
 
 // private/protected methods
-void logger::flush_() noexcept{
+void logger::flush_() noexcept {
     for (auto &sink : sinks_) {
         try {
             sink->flush();
