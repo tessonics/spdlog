@@ -109,7 +109,7 @@ void async_sink::backend_log_(const details::log_msg &msg)  {
             } catch (const std::exception &ex) {
                 err_helper_.handle_ex("async log", msg.source, ex);
             } catch (...) {
-                err_helper_.handle_unknown_ex("async log", source_loc{});
+                err_helper_.handle_unknown_ex("async log", msg.source);
             }
         }
     }
