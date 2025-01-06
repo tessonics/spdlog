@@ -48,7 +48,7 @@ public:
     ~logger() = default;
 
     template <typename... Args>
-    void log(source_loc loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
+    void log(const source_loc &loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
         if (should_log(lvl)) {
             log_with_format_(loc, lvl, fmt, std::forward<Args>(args)...);
         }
@@ -61,7 +61,7 @@ public:
         }
     }
     // log with no format string, just string message
-    void log(source_loc loc, level lvl, string_view_t msg) {
+    void log(const source_loc &loc, level lvl, string_view_t msg) {
         if (should_log(lvl)) {
             sink_it_(details::log_msg(loc, name_, lvl, msg));
         }
@@ -74,7 +74,7 @@ public:
     }
 
     // support for custom time
-    void log(log_clock::time_point log_time, source_loc loc, level lvl, string_view_t msg) {
+    void log(log_clock::time_point log_time, const source_loc &loc, level lvl, string_view_t msg) {
         if (should_log(lvl)) {
             sink_it_(details::log_msg(log_time, loc, name_, lvl, msg));
         }
