@@ -121,6 +121,11 @@ public:
     // return true if logging is enabled for the given level.
     [[nodiscard]] bool should_log(level msg_level) const { return msg_level >= level_.load(std::memory_order_relaxed); }
 
+    // return true if the given message should be flushed
+    [[nodiscard]] bool should_flush(const details::log_msg &msg) const {
+        return (msg.log_level >= flush_level_.load(std::memory_order_relaxed)) && (msg.log_level != level::off);
+    }
+
     // set the level of logging
     void set_level(level level);
 
@@ -193,12 +198,11 @@ private:
             }
         }
 
-        if (should_flush_(msg)) {
+        if (should_flush(msg)) {
             flush_();
         }
     }
     void flush_();
-    [[nodiscard]] bool should_flush_(const details::log_msg &msg) const;
 };
 
 }  // namespace spdlog
