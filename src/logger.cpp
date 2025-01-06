@@ -25,7 +25,7 @@ logger::logger(logger &&other) noexcept
 
 void logger::set_level(level level) { level_.store(level); }
 
-level logger::log_level() const { return level_.load(std::memory_order_relaxed); }
+level logger::log_level() const noexcept { return level_.load(std::memory_order_relaxed); }
 
 const std::string &logger::name() const { return name_; }
 
@@ -48,16 +48,16 @@ void logger::set_pattern(std::string pattern, pattern_time_type time_type) {
 }
 
 // flush functions
-void logger::flush() { flush_(); }
+void logger::flush() noexcept { flush_(); }
 
-void logger::flush_on(level level) { flush_level_.store(level); }
+void logger::flush_on(level level) noexcept { flush_level_.store(level); }
 
-level logger::flush_level() const { return flush_level_.load(std::memory_order_relaxed); }
+level logger::flush_level() const noexcept { return flush_level_.load(std::memory_order_relaxed); }
 
 // sinks
-const std::vector<sink_ptr> &logger::sinks() const { return sinks_; }
+const std::vector<sink_ptr> &logger::sinks() const noexcept { return sinks_; }
 
-std::vector<sink_ptr> &logger::sinks() { return sinks_; }
+std::vector<sink_ptr> &logger::sinks() noexcept { return sinks_; }
 
 // custom error handler
 void logger::set_error_handler(err_handler handler) { err_helper_.set_err_handler(std::move(handler)); }
@@ -70,7 +70,7 @@ std::shared_ptr<logger> logger::clone(std::string logger_name) {
 }
 
 // private/protected methods
-void logger::flush_() {
+void logger::flush_() noexcept{
     for (auto &sink : sinks_) {
         try {
             sink->flush();

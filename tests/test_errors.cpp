@@ -34,32 +34,31 @@ TEST_CASE("default_error_handler", "[errors]") {
 
 TEST_CASE("custom_error_handler", "[errors]") {
     prepare_logdir();
-    auto logger = spdlog::create<basic_file_sink_mt>("test-error", log_filename);
+    auto logger = spdlog::create<basic_file_sink_mt>("test-format-error", log_filename);
     logger->flush_on(spdlog::level::info);
     logger->set_error_handler([=](const std::string & msg) {
         REQUIRE(msg == "argument not found");
-        throw custom_ex();
     });
     logger->info("Good message #1");
-    REQUIRE_THROWS_AS(logger->info(SPDLOG_FMT_RUNTIME("Bad format msg {} {}"), "xxx"), custom_ex);
+    REQUIRE_NOTHROW(logger->info(SPDLOG_FMT_RUNTIME("Bad format msg {} {}"), "xxx"));
     logger->info("Good message #2");
     require_message_count(log_filename, 2);
 }
 
 TEST_CASE("default_error_handler2", "[errors]") {
-    auto logger = std::make_shared<spdlog::logger>("failed_logger", std::make_shared<failing_sink>());
+    auto logger = std::make_shared<spdlog::logger>("test-failing-sink", std::make_shared<failing_sink>());
     logger->set_error_handler([=](const std::string &msg) {
         REQUIRE(msg == log_err_msg);
         throw custom_ex();
     });
-    REQUIRE_THROWS_AS(logger->info("Some message"), custom_ex);
+    REQUIRE_NOTHROW(logger->info("Some message"));
 }
 
 TEST_CASE("flush_error_handler", "[errors]") {
-    auto logger = spdlog::create<failing_sink>("failed_logger");
+    auto logger = spdlog::create<failing_sink>("test-failing-sink");
     logger->set_error_handler([=](const std::string &msg) {
         REQUIRE(msg == flush_err_msg);
         throw custom_ex();
     });
-    REQUIRE_THROWS_AS(logger->flush(), custom_ex);
+    REQUIRE_NOTHROW(logger->flush());
 }

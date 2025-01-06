@@ -14,8 +14,8 @@ namespace details {
 class SPDLOG_API err_helper {
     err_handler custom_err_handler_;
 public:
-    void handle_ex(const std::string& origin, const source_loc& loc, const std::exception& ex) const;
-    void handle_unknown_ex(const std::string& origin, const source_loc& loc) const;
+    void handle_ex(const std::string& origin, const source_loc& loc, const std::exception& ex) const noexcept;
+    void handle_unknown_ex(const std::string& origin, const source_loc& loc) const noexcept;
     void set_err_handler(err_handler handler);
 };
 

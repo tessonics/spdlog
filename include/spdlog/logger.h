@@ -48,81 +48,81 @@ public:
     ~logger() = default;
 
     template <typename... Args>
-    void log(const source_loc &loc, level lvl, format_string_t<Args...> fmt, Args &&...args) {
+    void log(const source_loc &loc, level lvl, format_string_t<Args...> fmt, Args &&...args) noexcept {
         if (should_log(lvl)) {
             log_with_format_(loc, lvl, fmt, std::forward<Args>(args)...);
         }
     }
 
     template <typename... Args>
-    void log(level lvl, format_string_t<Args...> fmt, Args &&...args) {
+    void log(level lvl, format_string_t<Args...> fmt, Args &&...args) noexcept {
         if (should_log(lvl)) {
             log_with_format_(source_loc{}, lvl, fmt, std::forward<Args>(args)...);
         }
     }
     // log with no format string, just string message
-    void log(const source_loc &loc, level lvl, string_view_t msg) {
+    void log(const source_loc &loc, level lvl, string_view_t msg) noexcept {
         if (should_log(lvl)) {
             sink_it_(details::log_msg(loc, name_, lvl, msg));
         }
     }
 
-    void log(level lvl, string_view_t msg) {
+    void log(level lvl, string_view_t msg) noexcept {
         if (should_log(lvl)) {
             sink_it_(details::log_msg(source_loc{}, name_, lvl, msg));
         }
     }
 
     // support for custom time
-    void log(log_clock::time_point log_time, const source_loc &loc, level lvl, string_view_t msg) {
+    void log(log_clock::time_point log_time, const source_loc &loc, level lvl, string_view_t msg) noexcept {
         if (should_log(lvl)) {
             sink_it_(details::log_msg(log_time, loc, name_, lvl, msg));
         }
     }
 
     template <typename... Args>
-    void trace(format_string_t<Args...> fmt, Args &&...args) {
+    void trace(format_string_t<Args...> fmt, Args &&...args) noexcept {
         log(level::trace, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void debug(format_string_t<Args...> fmt, Args &&...args) {
+    void debug(format_string_t<Args...> fmt, Args &&...args) noexcept {
         log(level::debug, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void info(format_string_t<Args...> fmt, Args &&...args) {
+    void info(format_string_t<Args...> fmt, Args &&...args) noexcept {
         log(level::info, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void warn(format_string_t<Args...> fmt, Args &&...args) {
+    void warn(format_string_t<Args...> fmt, Args &&...args) noexcept {
         log(level::warn, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void error(format_string_t<Args...> fmt, Args &&...args) {
+    void error(format_string_t<Args...> fmt, Args &&...args) noexcept {
         log(level::err, fmt, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void critical(format_string_t<Args...> fmt, Args &&...args) {
+    void critical(format_string_t<Args...> fmt, Args &&...args) noexcept {
         log(level::critical, fmt, std::forward<Args>(args)...);
     }
 
     // log functions with no format string, just string
-    void trace(string_view_t msg) { log(level::trace, msg); }
-    void debug(string_view_t msg) { log(level::debug, msg); }
-    void info(string_view_t msg) { log(level::info, msg); }
-    void warn(string_view_t msg) { log(level::warn, msg); }
-    void error(string_view_t msg) { log(level::err, msg); }
-    void critical(string_view_t msg) { log(level::critical, msg); }
+    void trace(string_view_t msg) noexcept { log(level::trace, msg); }
+    void debug(string_view_t msg) noexcept { log(level::debug, msg); }
+    void info(string_view_t msg) noexcept { log(level::info, msg); }
+    void warn(string_view_t msg) noexcept { log(level::warn, msg); }
+    void error(string_view_t msg) noexcept { log(level::err, msg); }
+    void critical(string_view_t msg) noexcept { log(level::critical, msg); }
 
     // return true if logging is enabled for the given level.
-    [[nodiscard]] bool should_log(level msg_level) const { return msg_level >= level_.load(std::memory_order_relaxed); }
+    [[nodiscard]] bool should_log(level msg_level) const noexcept { return msg_level >= level_.load(std::memory_order_relaxed); }
 
     // return true if the given message should be flushed
-    [[nodiscard]] bool should_flush(const details::log_msg &msg) const {
+    [[nodiscard]] bool should_flush(const details::log_msg &msg) const noexcept {
         return (msg.log_level >= flush_level_.load(std::memory_order_relaxed)) && (msg.log_level != level::off);
     }
 
@@ -130,10 +130,10 @@ public:
     void set_level(level level);
 
     // return the active log level
-    [[nodiscard]] level log_level() const;
+    [[nodiscard]] level log_level() const noexcept;
 
     // return the name of the logger
-    [[nodiscard]] const std::string &name() const;
+    [[nodiscard]] const std::string &name() const noexcept;
 
     // set formatting for the sinks in this logger.
     // each sink will get a separate instance of the formatter object.
@@ -146,15 +146,15 @@ public:
     void set_pattern(std::string pattern, pattern_time_type time_type = pattern_time_type::local);
 
     // flush functions
-    void flush();
-    void flush_on(level level);
-    [[nodiscard]] level flush_level() const;
+    void flush() noexcept;
+    void flush_on(level level) noexcept;
+    [[nodiscard]] level flush_level() const noexcept;
 
     // sinks
-    [[nodiscard]] const std::vector<sink_ptr> &sinks() const;
-    [[nodiscard]] std::vector<sink_ptr> &sinks();
+    [[nodiscard]] const std::vector<sink_ptr> &sinks() const noexcept;
+    [[nodiscard]] std::vector<sink_ptr> &sinks() noexcept;
 
-    // error handler
+    // error handler. default is err_handler that prints the error to stderr.
     void set_error_handler(err_handler);
 
     // create new logger with same sinks and configuration.
@@ -170,7 +170,10 @@ private:
     // common implementation for after templated public api has been resolved to format string and
     // args
     template <typename... Args>
-    void log_with_format_(const source_loc &loc, const level lvl, const format_string_t<Args...> &format_string, Args &&...args) {
+    void log_with_format_(const source_loc &loc,
+                          const level lvl,
+                          const format_string_t<Args...> &format_string,
+                          Args &&...args) noexcept {
         assert(should_log(lvl));
         try {
             memory_buf_t buf;
@@ -184,7 +187,7 @@ private:
     }
 
     // log the given message (if the given log level is high enough)
-    void sink_it_(const details::log_msg &msg) {
+    void sink_it_(const details::log_msg &msg) noexcept {
         assert(should_log(msg.log_level));
         for (auto &sink : sinks_) {
             if (sink->should_log(msg.log_level)) {
@@ -202,7 +205,7 @@ private:
             flush_();
         }
     }
-    void flush_();
+    void flush_() noexcept;
 };
 
 }  // namespace spdlog
