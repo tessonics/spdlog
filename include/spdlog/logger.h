@@ -42,7 +42,7 @@ public:
     logger(std::string name, sinks_init_list sinks)
         : logger(std::move(name), sinks.begin(), sinks.end()) {}
 
-    logger(const logger &other) noexcept;
+    logger(const logger &other) ;
     logger(logger &&other) noexcept;
 
     ~logger() = default;

@@ -9,7 +9,7 @@
 namespace spdlog {
 
 // public methods
-logger::logger(const logger &other) noexcept
+logger::logger(const logger &other)
     : name_(other.name_),
       sinks_(other.sinks_),
       level_(other.level_.load(std::memory_order_relaxed)),
