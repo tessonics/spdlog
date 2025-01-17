@@ -123,9 +123,8 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Date time pattern appenders
+// Date time pattern formatters
 ///////////////////////////////////////////////////////////////////////
-
 static const char *ampm(const tm &t) { return t.tm_hour >= 12 ? "PM" : "AM"; }
 
 static int to12h(const tm &t) { return t.tm_hour > 12 ? t.tm_hour - 12 : t.tm_hour; }
