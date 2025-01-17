@@ -742,12 +742,22 @@ private:
 
 // Full info formatter
 // pattern: [%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%s:%#] %v
-class full_formatter final : public flag_formatter {
+class default_format_formatter final : public flag_formatter {
 public:
-    explicit full_formatter(padding_info padinfo)
+    // log level names all with same width.
+    static constexpr std::string_view trace_str =    "[trace] ";
+    static constexpr std::string_view debug_str =    "[debug] ";
+    static constexpr std::string_view info_str  =    "[info ] ";
+    static constexpr std::string_view warn_str  =    "[warn ] ";
+    static constexpr std::string_view error_str =    "[error] ";
+    static constexpr std::string_view critical_str = "[crit ] ";
+    static constexpr std::string_view off_str =      "[off  ] ";
+    static constexpr std::array<std::string_view, levels_count> padded_levels{{trace_str, debug_str, info_str, warn_str, error_str, critical_str, off_str}};
+
+    explicit default_format_formatter(padding_info padinfo)
         : flag_formatter(padinfo) {}
 
-    void format(const details::log_msg &msg, const std::tm &tm_time, memory_buf_t &dest) override {
+    void format(const log_msg &msg, const std::tm &tm_time, memory_buf_t &dest) override {
         using std::chrono::duration_cast;
         using std::chrono::milliseconds;
         using std::chrono::seconds;
@@ -794,14 +804,10 @@ public:
             dest.push_back(' ');
         }
 
-        dest.push_back('[');
-        // wrap the level name with color
-        msg.color_range_start = dest.size();
-        // fmt_helper::append_string_view(level::to_c_str(msg.log_level), dest);
-        fmt_helper::append_string_view(to_string_view(msg.log_level), dest);
-        msg.color_range_end = dest.size();
-        dest.push_back(']');
-        dest.push_back(' ');
+        // wrap the level name inside the [..] with color
+        msg.color_range_start = dest.size() + 1; // +1 to start coloring after the '[';
+        fmt_helper::append_string_view(padded_levels.at(static_cast<size_t>(msg.log_level)), dest);
+        msg.color_range_end = dest.size() - 2; // -2 to end coloring before the "] "
 
         // add source location if present
         if (!msg.source.empty()) {
@@ -844,7 +850,7 @@ pattern_formatter::pattern_formatter(pattern_time_type time_type, std::string eo
       need_localtime_{true},
       cached_tm_{},
       last_log_secs_{} {
-    formatters_.push_back(std::make_unique<details::full_formatter>(details::padding_info{}));
+    formatters_.push_back(std::make_unique<details::default_format_formatter>(details::padding_info{}));
 }
 
 std::unique_ptr<formatter> pattern_formatter::clone() const {
@@ -906,7 +912,7 @@ void pattern_formatter::handle_flag_(char flag, details::padding_info padding) {
     // process built-in flags
     switch (flag) {
         case ('+'):  // default formatter
-            formatters_.push_back(std::make_unique<details::full_formatter>(padding));
+            formatters_.push_back(std::make_unique<details::default_format_formatter>(padding));
             need_localtime_ = true;
             break;
 
