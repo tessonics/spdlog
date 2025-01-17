@@ -45,10 +45,12 @@ async_sink::~async_sink() {
     }
 }
 
-void async_sink::log(const details::log_msg &msg) { send_message_(async_log_msg::type::log, msg); }
+void async_sink::log(const details::log_msg &msg) {
+    enqueue_message_(async_log_msg(async_log_msg::type::log, msg));
+}
 
 void async_sink::flush() {
-    send_message_(async_log_msg::type::flush, details::log_msg());
+    enqueue_message_(details::async_log_msg(async_log_msg::type::flush));
 }
 
 void async_sink::set_pattern(const std::string &pattern) { set_formatter(std::make_unique<pattern_formatter>(pattern)); }
@@ -94,16 +96,16 @@ void async_sink::reset_discard_counter() const { q_->reset_discard_counter(); }
 const async_sink::config &async_sink::get_config() const { return config_; }
 
 // private methods
-void async_sink::send_message_(async_log_msg::type msg_type, const details::log_msg &msg) const {
+void async_sink::enqueue_message_(details::async_log_msg &&msg) const {
     switch (config_.policy) {
         case overflow_policy::block:
-            q_->enqueue(async_log_msg(msg_type, msg));
+            q_->enqueue(std::move(msg));
             break;
         case overflow_policy::overrun_oldest:
-            q_->enqueue_nowait(async_log_msg(msg_type, msg));
+            q_->enqueue_nowait(std::move(msg));
             break;
         case overflow_policy::discard_new:
-            q_->enqueue_if_have_room(async_log_msg(msg_type, msg));
+            q_->enqueue_if_have_room(std::move(msg));
             break;
         default:
             assert(false);

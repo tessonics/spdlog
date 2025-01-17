@@ -94,7 +94,7 @@ private:
     using async_log_msg = details::async_log_msg;
     using queue_t = details::mpmc_blocking_queue<async_log_msg>;
 
-    void send_message_(async_log_msg::type msg_type, const details::log_msg &msg) const;
+    void enqueue_message_(details::async_log_msg &&msg) const;
     void backend_loop_();
     void backend_log_(const details::log_msg &msg) ;
     void backend_flush_();
