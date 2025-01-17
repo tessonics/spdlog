@@ -3,20 +3,34 @@
 
 #include "spdlog/details/err_helper.h"
 
-#include "iostream"
 #include "spdlog/details/os.h"
 
 namespace spdlog {
 namespace details {
 
+err_helper::err_helper(const err_helper &other)
+    : custom_err_handler_(other.custom_err_handler_),
+      last_report_time_(other.last_report_time_) {}
+
+err_helper::err_helper(err_helper &&other)
+    : custom_err_handler_(std::move(other.custom_err_handler_)),
+      last_report_time_(other.last_report_time_) {};
+
 // Prints error to stderr with source location (if available). A stderr sink is not used because reaching
 // this point might indicate a problem with the logging system itself so we use fputs() directly.
-void err_helper::handle_ex(const std::string &origin, const source_loc &loc, const std::exception &ex) const noexcept {
+void err_helper::handle_ex(const std::string &origin, const source_loc &loc, const std::exception &ex) noexcept {
+    std::lock_guard lock(mutex_);
     try {
         if (custom_err_handler_) {
             custom_err_handler_(ex.what());
             return;
         }
+
+        const auto now = std::chrono::steady_clock::now();
+        if (now - last_report_time_ < std::chrono::seconds(1)) {
+            return;
+        }
+        last_report_time_ = now;
         const auto tm_time = os::localtime();
         char date_buf[32];
         std::strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", &tm_time);
@@ -29,17 +43,21 @@ void err_helper::handle_ex(const std::string &origin, const source_loc &loc, con
         }
         std::fputs(msg.c_str(), stderr);
     } catch (const std::exception &handler_ex) {
-        std::fprintf(stderr, "[*** LOG ERROR ***] [%s] caught exception during error handler: %s\n", origin.c_str(), handler_ex.what());
+        std::fprintf(stderr, "[*** LOG ERROR ***] [%s] caught exception during error handler: %s\n", origin.c_str(),
+                     handler_ex.what());
     } catch (...) {  // catch all exceptions
         std::fprintf(stderr, "[*** LOG ERROR ***] [%s] caught unknown exception during error handler\n", origin.c_str());
     }
 }
 
-void err_helper::handle_unknown_ex(const std::string &origin, const source_loc &loc) const noexcept {
+void err_helper::handle_unknown_ex(const std::string &origin, const source_loc &loc) noexcept {
     handle_ex(origin, loc, std::runtime_error("unknown exception"));
 }
 
-void err_helper::set_err_handler(err_handler handler) { custom_err_handler_ = std::move(handler); }
+void err_helper::set_err_handler(err_handler handler) {
+    std::lock_guard lock(mutex_);
+    custom_err_handler_ = std::move(handler);
+}
 
 }  // namespace details
 }  // namespace spdlog
