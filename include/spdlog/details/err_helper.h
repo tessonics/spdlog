@@ -15,9 +15,10 @@ namespace details {
 class SPDLOG_API err_helper {
     err_handler custom_err_handler_;
     std::chrono::steady_clock::time_point last_report_time_;
-    std::mutex mutex_;
+    mutable std::mutex mutex_;
 public:
     err_helper() = default;
+    ~err_helper() = default;
     err_helper(const err_helper& other);
     err_helper(err_helper&& other) noexcept;
     void handle_ex(const std::string& origin, const source_loc& loc, const std::exception& ex) noexcept;

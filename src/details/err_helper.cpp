@@ -8,13 +8,16 @@
 namespace spdlog {
 namespace details {
 
-err_helper::err_helper(const err_helper &other)
-    : custom_err_handler_(other.custom_err_handler_),
-      last_report_time_(other.last_report_time_) {}
+err_helper::err_helper(const err_helper &other) {
+    std::lock_guard lock(other.mutex_);
+    custom_err_handler_ = other.custom_err_handler_;
+    last_report_time_ = other.last_report_time_;
+}
 
-err_helper::err_helper(err_helper &&other) noexcept
-    : custom_err_handler_(std::move(other.custom_err_handler_)),
-      last_report_time_(other.last_report_time_) {}
+err_helper::err_helper(err_helper &&other) noexcept {
+    custom_err_handler_ = std::move(other.custom_err_handler_);
+    last_report_time_ = std::move(other.last_report_time_);
+}
 
 // Prints error to stderr with source location (if available). A stderr sink is not used because reaching
 // this point might indicate a problem with the logging system itself so we use fputs() directly.
