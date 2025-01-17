@@ -65,7 +65,9 @@ public:
     }
 
 private:
-    void pad_it(long count) { fmt_helper::append_string_view(string_view_t(spaces_.data(), static_cast<size_t>(count)), dest_); }
+    void pad_it(long count) {
+        dest_.append(spaces_.data(), spaces_.data() + static_cast<size_t>(count));
+    }
 
     const padding_info &padinfo_;
     memory_buf_t &dest_;
