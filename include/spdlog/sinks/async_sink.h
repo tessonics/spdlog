@@ -45,6 +45,8 @@ public:
     explicit async_sink(config async_config);
     async_sink(const async_sink &) = delete;
     async_sink &operator=(const async_sink &) = delete;
+    async_sink(async_sink &&) = delete;
+    async_sink &operator=(async_sink &&) = delete;
     ~async_sink() override;
 
     // sink interface implementation
@@ -103,7 +105,6 @@ private:
     std::unique_ptr<queue_t> q_;
     std::thread worker_thread_;
     details::err_helper err_helper_;
-    std::atomic_size_t flush_requests_ = 0;
     std::atomic_bool terminate_worker_ = false;
 };
 

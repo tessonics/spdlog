@@ -33,6 +33,7 @@ async_sink::async_sink(config async_config)
     });
 }
 
+
 async_sink::~async_sink() {
     try {
         q_->enqueue(async_log_msg(async_log_msg::type::terminate));
