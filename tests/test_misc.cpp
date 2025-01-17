@@ -74,6 +74,67 @@ TEST_CASE("to_level_enum", "[convert_to_level_enum]") {
     REQUIRE(spdlog::level_from_str("null") == spdlog::level::off);
 }
 
+TEST_CASE("copy_ctor", "[copy_ctor]") {
+    using spdlog::sinks::test_sink_mt;
+    auto test_sink = std::make_shared<test_sink_mt>();
+    auto logger = std::make_shared<spdlog::logger>("orig", test_sink);
+    logger->set_pattern("%v");
+    bool error_handled = false;
+    logger->set_error_handler([&error_handled](const std::string&) { error_handled = true; });
+    spdlog::logger copied = *logger;
+
+    REQUIRE(copied.name() == logger->name());
+    REQUIRE(logger->sinks() == copied.sinks());
+    REQUIRE(logger->log_level() == copied.log_level());
+    REQUIRE(logger->flush_level() == copied.flush_level());
+
+    logger->info("Some message 1");
+    copied.info("Some message 2");
+
+    REQUIRE(test_sink->lines().size() == 2);
+    REQUIRE(test_sink->lines()[0] == "Some message 1");
+    REQUIRE(test_sink->lines()[1] == "Some message 2");
+
+    // check that copied custom error handler was indeed copied
+    test_sink->set_exception(std::runtime_error("Some error"));
+    REQUIRE(error_handled == false);
+    copied.error("Some error");
+    REQUIRE(error_handled == true);
+}
+
+TEST_CASE("move_ctor", "[move_ctor]") {
+    auto log_level = spdlog::level::critical;
+    auto flush_level = spdlog::level::warn;
+    using spdlog::sinks::test_sink_mt;
+    auto test_sink = std::make_shared<test_sink_mt>();
+    auto logger = std::make_shared<spdlog::logger>("orig", test_sink);
+    logger->flush_on(flush_level);
+    logger->set_level(log_level);
+    logger->set_pattern("%v");
+    bool error_handled = false;
+    logger->set_error_handler([&error_handled](const std::string&) { error_handled = true; });
+    spdlog::logger moved = std::move(*logger);
+
+    REQUIRE(logger->name() == "");
+    REQUIRE(logger->sinks().empty());
+    REQUIRE(moved.name() == "orig");
+    REQUIRE(moved.sinks()[0].get() == test_sink.get());
+    REQUIRE(moved.log_level() == log_level);
+    REQUIRE(moved.flush_level() == flush_level);
+
+    logger->critical("Some message 1");
+    moved.critical("Some message 2");
+
+    REQUIRE(test_sink->lines().size() == 1);
+    REQUIRE(test_sink->lines()[0] == "Some message 2");
+
+    // check that copied custom error handler was indeed copied
+    test_sink->set_exception(std::runtime_error("Some error"));
+    REQUIRE(error_handled == false);
+    moved.critical("Some error");
+    REQUIRE(error_handled == true);
+}
+
 TEST_CASE("clone-logger", "[clone]") {
     using spdlog::sinks::test_sink_mt;
     auto test_sink = std::make_shared<test_sink_mt>();
