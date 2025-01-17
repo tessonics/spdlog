@@ -3,8 +3,8 @@ include(FetchContent)
 FetchContent_Declare(
     fmt
     DOWNLOAD_EXTRACT_TIMESTAMP FALSE
-    URL https://github.com/fmtlib/fmt/archive/refs/tags/11.0.2.tar.gz
-    URL_HASH SHA256=6cb1e6d37bdcb756dbbe59be438790db409cdb4868c66e888d5df9f13f7c027f)
+    URL https://github.com/fmtlib/fmt/archive/refs/tags/11.1.2.tar.gz
+    URL_HASH SHA256=d8773cf062cc806d4dd4df658111f15ba7a2c9c65db5084d2491696828b1eb97)
 
 FetchContent_GetProperties(fmt)
 if(NOT fmt_POPULATED)
