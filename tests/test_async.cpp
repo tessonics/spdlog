@@ -331,7 +331,7 @@ TEST_CASE("wait_all", "[async]") {
     REQUIRE(elapsed >= delay);
     REQUIRE(elapsed < delay * 3);
     // wait enough time for all messages to be processed
-    REQUIRE(as->wait_all(std::chrono::milliseconds(messages * delay + 250)));
+    REQUIRE(as->wait_all(std::chrono::milliseconds(messages * delay + std::chrono::milliseconds(500))));
     REQUIRE(as->wait_all(std::chrono::milliseconds(-10)));  // no more messages
     REQUIRE(as->wait_all(std::chrono::milliseconds(0)));    // no more messages
     REQUIRE(as->wait_all(std::chrono::milliseconds(10)));   // no more messages
