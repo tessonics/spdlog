@@ -14,11 +14,15 @@
 namespace spdlog {
 namespace sinks {
 
-async_sink::async_sink(config async_config)
-    : config_(std::move(async_config)) {
+async_sink::async_sink(const config &async_config)
+    : config_(async_config) {
     if (config_.queue_size == 0 || config_.queue_size > max_queue_size) {
         throw spdlog_ex("async_sink: invalid queue size");
     }
+    if (config_.custom_err_handler) {
+        err_helper_.set_err_handler(config_.custom_err_handler);
+    }
+
     q_ = std::make_unique<queue_t>(config_.queue_size);
     worker_thread_ = std::thread([this] {
         if (config_.on_thread_start) config_.on_thread_start();

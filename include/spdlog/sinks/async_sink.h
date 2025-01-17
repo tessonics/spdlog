@@ -42,7 +42,7 @@ public:
         err_handler custom_err_handler = nullptr;
     };
 
-    explicit async_sink(config async_config);
+    explicit async_sink(const config &async_config);
 
     // create an async_sink with one backend sink
     template <typename Sink, typename... SinkArgs>

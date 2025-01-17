@@ -18,6 +18,5 @@ public:
     void handle_unknown_ex(const std::string& origin, const source_loc& loc) const noexcept;
     void set_err_handler(err_handler handler);
 };
-
-
-}} // namespace spdlog::details
+} // namespace details
+} // namespace spdlog

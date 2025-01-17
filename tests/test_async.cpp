@@ -295,3 +295,17 @@ TEST_CASE("backend_ex", "[async]") {
     REQUIRE_NOTHROW(logger->info("Hello message"));
     REQUIRE_NOTHROW(logger->flush());
 }
+
+// test async custom error handler. trigger it using a backend exception and make sure it's called
+TEST_CASE("custom_err_handler", "[async]") {
+    bool error_called = false;
+    auto test_sink = std::make_shared<test_sink_mt>();
+    test_sink->set_exception(std::runtime_error("test backend exception"));
+    async_sink::config config;
+    config.sinks.push_back(std::move(test_sink));
+    config.custom_err_handler = [&error_called](const std::string &) { error_called = true;};
+    auto asink = std::make_shared<async_sink>(config);
+    spdlog::logger ("async_logger", std::move(asink)).info("Test");
+    // lvalue logger so will be destructed here already so all messages were processed
+    REQUIRE(error_called);
+}
