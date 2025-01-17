@@ -91,14 +91,13 @@ public:
         return std::make_shared<async_sink>(cfg);
     }
 
-
 private:
     using async_log_msg = details::async_log_msg;
     using queue_t = details::mpmc_blocking_queue<async_log_msg>;
 
     void enqueue_message_(details::async_log_msg &&msg) const;
     void backend_loop_();
-    void backend_log_(const details::log_msg &msg) ;
+    void backend_log_(const details::log_msg &msg);
     void backend_flush_();
 
     config config_;

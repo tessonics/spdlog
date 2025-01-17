@@ -109,7 +109,6 @@ template <typename Mutex>
 ansicolor_stderr_sink<Mutex>::ansicolor_stderr_sink(color_mode mode)
     : ansicolor_sink<Mutex>(stderr, mode) {}
 
-
 }  // namespace sinks
 }  // namespace spdlog
 

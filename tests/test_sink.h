@@ -6,9 +6,9 @@
 #pragma once
 
 #include <chrono>
+#include <exception>
 #include <mutex>
 #include <thread>
-#include <exception>
 
 #include "spdlog/details/null_mutex.h"
 #include "spdlog/details/os.h"
@@ -37,13 +37,9 @@ public:
         delay_ = delay;
     }
 
-    void set_exception(const std::runtime_error& ex) {
-        exception_ptr_ = std::make_exception_ptr(ex);
-    }
+    void set_exception(const std::runtime_error& ex) { exception_ptr_ = std::make_exception_ptr(ex); }
 
-    void clear_exception() {
-        exception_ptr_ = nullptr;
-    }
+    void clear_exception() { exception_ptr_ = nullptr; }
 
     // return last output without the eol
     std::vector<std::string> lines() {
@@ -52,7 +48,7 @@ public:
     }
 
 protected:
-    void sink_it_(const details::log_msg &msg) override {
+    void sink_it_(const details::log_msg& msg) override {
         if (exception_ptr_) {
             std::rethrow_exception(exception_ptr_);
         }
@@ -78,7 +74,7 @@ protected:
     size_t flush_counter_{0};
     std::chrono::milliseconds delay_{std::chrono::milliseconds::zero()};
     std::vector<std::string> lines_;
-    std::exception_ptr exception_ptr_; // will be thrown on next log or flush if not null
+    std::exception_ptr exception_ptr_;  // will be thrown on next log or flush if not null
 };
 
 using test_sink_mt = test_sink<std::mutex>;

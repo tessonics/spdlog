@@ -6,7 +6,6 @@
 namespace spdlog {
 namespace details {
 
-
 async_log_msg::async_log_msg(const type type)
     : msg_type_{type} {}
 
@@ -15,21 +14,25 @@ async_log_msg::async_log_msg(const type type)
 // are compiler generated const chars* (__FILE__, __LINE__, __FUNCTION__)
 // if you pass custom strings to source location, make sure they outlive the async_log_msg
 async_log_msg::async_log_msg(const type type, const log_msg &orig_msg)
-    : log_msg{orig_msg}, msg_type_(type) {
+    : log_msg{orig_msg},
+      msg_type_(type) {
     buffer_.append(logger_name);
     buffer_.append(payload);
     update_string_views();
 }
 
 async_log_msg::async_log_msg(const async_log_msg &other)
-    : log_msg{other}, msg_type_{other.msg_type_} {
+    : log_msg{other},
+      msg_type_{other.msg_type_} {
     buffer_.append(logger_name);
     buffer_.append(payload);
     update_string_views();
 }
 
 async_log_msg::async_log_msg(async_log_msg &&other) noexcept
-    : log_msg{other}, msg_type_{other.msg_type_}, buffer_{std::move(other.buffer_)} {
+    : log_msg{other},
+      msg_type_{other.msg_type_},
+      buffer_{std::move(other.buffer_)} {
     update_string_views();
 }
 

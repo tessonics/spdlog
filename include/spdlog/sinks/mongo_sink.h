@@ -16,11 +16,11 @@
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 #include <mongocxx/uri.hpp>
-
 #include <mutex>
-#include "../details/null_mutex.h"
+
 #include "../common.h"
 #include "../details/log_msg.h"
+#include "../details/null_mutex.h"
 #include "./base_sink.h"
 
 namespace spdlog {

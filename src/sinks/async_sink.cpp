@@ -33,26 +33,21 @@ async_sink::async_sink(config async_config)
     });
 }
 
-
 async_sink::~async_sink() {
     try {
         q_->enqueue(async_log_msg(async_log_msg::type::terminate));
         worker_thread_.join();
     } catch (...) {
-        terminate_worker_ = true; // as last resort, stop the worker thread using terminate_worker_ flag.
-        #ifndef NDEBUG
-            printf("Exception in ~async_sink()\n");
-        #endif
+        terminate_worker_ = true;  // as last resort, stop the worker thread using terminate_worker_ flag.
+#ifndef NDEBUG
+        printf("Exception in ~async_sink()\n");
+#endif
     }
 }
 
-void async_sink::log(const details::log_msg &msg) {
-    enqueue_message_(async_log_msg(async_log_msg::type::log, msg));
-}
+void async_sink::log(const details::log_msg &msg) { enqueue_message_(async_log_msg(async_log_msg::type::log, msg)); }
 
-void async_sink::flush() {
-    enqueue_message_(details::async_log_msg(async_log_msg::type::flush));
-}
+void async_sink::flush() { enqueue_message_(details::async_log_msg(async_log_msg::type::flush)); }
 
 void async_sink::set_pattern(const std::string &pattern) { set_formatter(std::make_unique<pattern_formatter>(pattern)); }
 
@@ -83,7 +78,8 @@ bool async_sink::wait_all(const std::chrono::milliseconds timeout) const {
 }
 
 void async_sink::wait_all() const {
-    while (!wait_all(std::chrono::milliseconds(10))) { /* empty */ }
+    while (!wait_all(std::chrono::milliseconds(10))) { /* empty */
+    }
 }
 
 size_t async_sink::get_overrun_counter() const { return q_->overrun_counter(); }

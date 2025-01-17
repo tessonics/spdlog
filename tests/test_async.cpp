@@ -71,7 +71,6 @@ TEST_CASE("discard policy discard_new ", "[async]") {
     auto as = std::make_shared<async_sink>(config);
     auto logger = std::make_shared<spdlog::logger>("async_logger", as);
 
-
     REQUIRE(as->get_config().policy == async_sink::overflow_policy::discard_new);
     REQUIRE(as->get_discard_counter() == 0);
     REQUIRE(as->get_overrun_counter() == 0);
@@ -166,7 +165,6 @@ TEST_CASE("to_file", "[async]") {
     using spdlog::details::os::default_eol;
     REQUIRE(ends_with(contents, spdlog::fmt_lib::format("Hello message #1023{}", default_eol)));
 }
-
 
 TEST_CASE("bad_ctor", "[async]") {
     async_sink::config cfg;
@@ -303,9 +301,9 @@ TEST_CASE("custom_err_handler", "[async]") {
     test_sink->set_exception(std::runtime_error("test backend exception"));
     async_sink::config config;
     config.sinks.push_back(std::move(test_sink));
-    config.custom_err_handler = [&error_called](const std::string &) { error_called = true;};
+    config.custom_err_handler = [&error_called](const std::string &) { error_called = true; };
     auto asink = std::make_shared<async_sink>(config);
-    spdlog::logger ("async_logger", std::move(asink)).info("Test");
+    spdlog::logger("async_logger", std::move(asink)).info("Test");
     // lvalue logger so will be destructed here already so all messages were processed
     REQUIRE(error_called);
 }
@@ -334,9 +332,9 @@ TEST_CASE("wait_all", "[async]") {
     REQUIRE(elapsed < delay * 3);
     // wait enough time for all messages to be processed
     REQUIRE(as->wait_all(std::chrono::milliseconds(messages * delay)));
-    REQUIRE(as->wait_all(std::chrono::milliseconds(-10))); // no more messages
-    REQUIRE(as->wait_all(std::chrono::milliseconds(0)));   // no more messages
-    REQUIRE(as->wait_all(std::chrono::milliseconds(10)));  // no more messages
+    REQUIRE(as->wait_all(std::chrono::milliseconds(-10)));  // no more messages
+    REQUIRE(as->wait_all(std::chrono::milliseconds(0)));    // no more messages
+    REQUIRE(as->wait_all(std::chrono::milliseconds(10)));   // no more messages
 }
 
 // test wait_all without timeout

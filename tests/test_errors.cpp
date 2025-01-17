@@ -18,7 +18,6 @@ protected:
 };
 struct custom_ex {};
 
-
 using namespace spdlog::sinks;
 TEST_CASE("default_error_handler", "[errors]") {
     prepare_logdir();
@@ -36,9 +35,7 @@ TEST_CASE("custom_error_handler", "[errors]") {
     prepare_logdir();
     auto logger = spdlog::create<basic_file_sink_mt>("test-format-error", log_filename);
     logger->flush_on(spdlog::level::info);
-    logger->set_error_handler([=](const std::string & msg) {
-        REQUIRE(msg == "argument not found");
-    });
+    logger->set_error_handler([=](const std::string &msg) { REQUIRE(msg == "argument not found"); });
     logger->info("Good message #1");
     REQUIRE_NOTHROW(logger->info(SPDLOG_FMT_RUNTIME("Bad format msg {} {}"), "xxx"));
     logger->info("Good message #2");

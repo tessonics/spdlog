@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <mutex>
+
 #include "spdlog/common.h"
 #include "spdlog/pattern_formatter.h"
 
@@ -53,8 +54,8 @@ void base_sink<Mutex>::set_formatter_(std::unique_ptr<formatter> sink_formatter)
     formatter_ = std::move(sink_formatter);
 }
 
-} // namespace sinks
-} // namespace spdlog
+}  // namespace sinks
+}  // namespace spdlog
 
 // template instantiations
 #include "spdlog/details/null_mutex.h"

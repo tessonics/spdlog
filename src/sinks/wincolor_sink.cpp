@@ -8,6 +8,7 @@
 
 // clang-format on
 #include "spdlog/sinks/wincolor_sink.h"
+
 #include "spdlog/common.h"
 
 namespace spdlog {
@@ -130,7 +131,6 @@ wincolor_stdout_sink<Mutex>::wincolor_stdout_sink(color_mode mode)
 template <typename Mutex>
 wincolor_stderr_sink<Mutex>::wincolor_stderr_sink(color_mode mode)
     : wincolor_sink<Mutex>(::GetStdHandle(STD_ERROR_HANDLE), mode) {}
-
 
 }  // namespace sinks
 }  // namespace spdlog

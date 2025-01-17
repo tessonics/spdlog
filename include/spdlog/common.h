@@ -6,13 +6,13 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <exception>
 #include <functional>
 #include <initializer_list>
 #include <memory>
 #include <string>
 #include <string_view>
-#include <cstdint>
 
 #include "./source_loc.h"
 #include "fmt/base.h"

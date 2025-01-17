@@ -88,7 +88,7 @@ void stdout_logger_example() {
     // Create color multithreading logger.
     auto console = spdlog::create<stdout_color_sink_mt>("console");
     // or for stderr:
-    //auto console = spdlog::create<stderr_color_sink_mt>("console");
+    // auto console = spdlog::create<stderr_color_sink_mt>("console");
 }
 
 #include "spdlog/sinks/basic_file_sink.h"

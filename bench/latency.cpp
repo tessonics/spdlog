@@ -124,7 +124,8 @@ int main(int argc, char *argv[]) {
         benchmark::RegisterBenchmark("basic_st", bench_logger, std::move(basic_st))->UseRealTime();
 
         // rotating st
-        auto rotating_st = spdlog::create<rotating_file_sink_st>("rotating_st", "latency_logs/rotating_st.log", file_size, rotating_files);
+        auto rotating_st =
+            spdlog::create<rotating_file_sink_st>("rotating_st", "latency_logs/rotating_st.log", file_size, rotating_files);
         benchmark::RegisterBenchmark("rotating_st", bench_logger, std::move(rotating_st))->UseRealTime();
 
         // daily st
@@ -142,7 +143,8 @@ int main(int argc, char *argv[]) {
         benchmark::RegisterBenchmark("basic_mt", bench_logger, std::move(basic_mt))->Threads(n_threads)->UseRealTime();
 
         // rotating mt
-        auto rotating_mt = spdlog::create<rotating_file_sink_mt>("rotating_mt", "latency_logs/rotating_mt.log", file_size, rotating_files);
+        auto rotating_mt =
+            spdlog::create<rotating_file_sink_mt>("rotating_mt", "latency_logs/rotating_mt.log", file_size, rotating_files);
         benchmark::RegisterBenchmark("rotating_mt", bench_logger, std::move(rotating_mt))->Threads(n_threads)->UseRealTime();
 
         // daily mt
@@ -151,7 +153,8 @@ int main(int argc, char *argv[]) {
     }
     using spdlog::sinks::async_sink;
     async_sink::config config;
-    config.queue_size = 3 * 1024 * 1024;;
+    config.queue_size = 3 * 1024 * 1024;
+    ;
     config.sinks.push_back(std::make_shared<null_sink_st>());
     config.policy = async_sink::overflow_policy::overrun_oldest;
     auto async_logger = std::make_shared<spdlog::logger>("async_logger", std::make_shared<async_sink>(config));

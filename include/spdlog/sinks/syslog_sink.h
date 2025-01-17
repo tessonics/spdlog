@@ -8,8 +8,8 @@
 #include <syslog.h>
 
 #include <array>
-#include <string>
 #include <mutex>
+#include <string>
 
 namespace spdlog {
 namespace sinks {
@@ -19,7 +19,7 @@ namespace sinks {
 template <typename Mutex>
 class syslog_sink final : public base_sink<Mutex> {
 public:
-    syslog_sink(std::string ident = "", int syslog_option = 0, int syslog_facility = LOG_USER, bool enable_formatting=false)
+    syslog_sink(std::string ident = "", int syslog_option = 0, int syslog_facility = LOG_USER, bool enable_formatting = false)
         : enable_formatting_{enable_formatting},
           syslog_levels_{{/* spdlog::level::trace      */ LOG_DEBUG,
                           /* spdlog::level::debug      */ LOG_DEBUG,

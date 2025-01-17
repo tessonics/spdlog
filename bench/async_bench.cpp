@@ -6,14 +6,14 @@
 //
 // bench.cpp : spdlog benchmarks
 //
+#include <algorithm>
 #include <atomic>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <locale>
 #include <memory>
 #include <string>
 #include <thread>
-#include <locale>
-#include <algorithm>
 
 #include "spdlog/sinks/async_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
                 auto logger = std::make_shared<spdlog::logger>("async_logger", std::move(async_sink));
                 bench_mt(howmany, std::move(logger), threads);
             }
-            //verify_file(filename, howmany); // in separate scope to ensure logger is destroyed and all logs were written
+            // verify_file(filename, howmany); // in separate scope to ensure logger is destroyed and all logs were written
         }
         spdlog::info("");
         spdlog::info("*********************************");
