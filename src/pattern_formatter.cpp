@@ -744,7 +744,8 @@ private:
 // pattern: [%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%s:%#] %v
 class default_format_formatter final : public flag_formatter {
 public:
-    // log level names all with same width.
+    // clang-format off
+    // aligned level names
     static constexpr std::string_view trace_str =    "[trace] ";
     static constexpr std::string_view debug_str =    "[debug] ";
     static constexpr std::string_view info_str  =    "[info ] ";
@@ -752,7 +753,9 @@ public:
     static constexpr std::string_view error_str =    "[error] ";
     static constexpr std::string_view critical_str = "[crit ] ";
     static constexpr std::string_view off_str =      "[off  ] ";
-    static constexpr std::array<std::string_view, levels_count> padded_levels{{trace_str, debug_str, info_str, warn_str, error_str, critical_str, off_str}};
+    // clang-format on
+    static constexpr std::array<std::string_view, levels_count> padded_levels{
+        {trace_str, debug_str, info_str, warn_str, error_str, critical_str, off_str}};
 
     explicit default_format_formatter(padding_info padinfo)
         : flag_formatter(padinfo) {}
@@ -790,13 +793,13 @@ public:
             cache_timestamp_ = secs;
         }
         dest.append(cached_datetime_.begin(), cached_datetime_.end());
-
+        // append milliseconds
         auto millis = fmt_helper::time_fraction<milliseconds>(msg.time);
         fmt_helper::pad3(static_cast<uint32_t>(millis.count()), dest);
         dest.push_back(']');
         dest.push_back(' ');
 
-        // append logger name if exists
+        // append aligned logger name if exists
         if (!msg.logger_name.empty()) {
             dest.push_back('[');
             fmt_helper::append_string_view(msg.logger_name, dest);
@@ -805,9 +808,9 @@ public:
         }
 
         // wrap the level name inside the [..] with color
-        msg.color_range_start = dest.size() + 1; // +1 to start coloring after the '[';
+        msg.color_range_start = dest.size() + 1;  // +1 to start coloring after the '[';
         fmt_helper::append_string_view(padded_levels.at(static_cast<size_t>(msg.log_level)), dest);
-        msg.color_range_end = dest.size() - 2; // -2 to end coloring before the "] "
+        msg.color_range_end = dest.size() - 2;  // -2 to end coloring before the "] "
 
         // add source location if present
         if (!msg.source.empty()) {
