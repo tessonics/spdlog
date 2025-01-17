@@ -12,7 +12,7 @@ err_helper::err_helper(const err_helper &other)
     : custom_err_handler_(other.custom_err_handler_),
       last_report_time_(other.last_report_time_) {}
 
-err_helper::err_helper(err_helper &&other)
+err_helper::err_helper(err_helper &&other) noexcept
     : custom_err_handler_(std::move(other.custom_err_handler_)),
       last_report_time_(other.last_report_time_) {}
 

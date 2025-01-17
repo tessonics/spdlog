@@ -19,7 +19,7 @@ class SPDLOG_API err_helper {
 public:
     err_helper() = default;
     err_helper(const err_helper& other);
-    err_helper(err_helper&& other);
+    err_helper(err_helper&& other) noexcept;;
     void handle_ex(const std::string& origin, const source_loc& loc, const std::exception& ex) noexcept;
     void handle_unknown_ex(const std::string& origin, const source_loc& loc) noexcept;
     void set_err_handler(err_handler handler);
