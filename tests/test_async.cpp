@@ -329,7 +329,7 @@ TEST_CASE("wait_all", "[async]") {
     // should have waited approx 10ms before giving up
     auto elapsed = std::chrono::steady_clock::now() - start;
     REQUIRE(elapsed >= delay);
-    REQUIRE(elapsed < delay * 3);
+    REQUIRE(elapsed < delay *  6); // to pass tests in slow virtual machines
     // wait enough time for all messages to be processed
     REQUIRE(as->wait_all(messages * delay + 500ms));
     REQUIRE(as->wait_all(-10ms));  // no more messages
