@@ -10,6 +10,7 @@
 using spdlog::sinks::async_sink;
 using spdlog::sinks::sink;
 using spdlog::sinks::test_sink_mt;
+using namespace std::chrono_literals;
 
 auto creat_async_logger(size_t queue_size, std::shared_ptr<sink> backend_sink) {
     async_sink::config cfg;
@@ -41,7 +42,7 @@ TEST_CASE("basic async test ", "[async]") {
 
 TEST_CASE("discard policy ", "[async]") {
     auto test_sink = std::make_shared<test_sink_mt>();
-    test_sink->set_delay(std::chrono::milliseconds(1));
+    test_sink->set_delay(1ms);
     async_sink::config config;
     config.queue_size = 4;
     config.policy = async_sink::overflow_policy::overrun_oldest;
@@ -62,7 +63,7 @@ TEST_CASE("discard policy ", "[async]") {
 
 TEST_CASE("discard policy discard_new ", "[async]") {
     auto test_sink = std::make_shared<test_sink_mt>();
-    test_sink->set_delay(std::chrono::milliseconds(1));
+    test_sink->set_delay(1ms);
     async_sink::config config;
     config.queue_size = 4;
     config.policy = async_sink::overflow_policy::discard_new;
@@ -94,14 +95,13 @@ TEST_CASE("flush", "[async]") {
         }
         logger->flush();
     }
-    // std::this_thread::sleep_for(std::chrono::milliseconds(250));
     REQUIRE(test_sink->msg_counter() == messages);
     REQUIRE(test_sink->flush_counter() == 1);
 }
 
 TEST_CASE("wait_dtor ", "[async]") {
     auto test_sink = std::make_shared<test_sink_mt>();
-    test_sink->set_delay(std::chrono::milliseconds(5));
+    test_sink->set_delay(5ms);
     async_sink::config config;
     config.sinks.push_back(test_sink);
     config.queue_size = 4;
@@ -311,7 +311,7 @@ TEST_CASE("custom_err_handler", "[async]") {
 // test wait_all
 TEST_CASE("wait_all", "[async]") {
     auto test_sink = std::make_shared<test_sink_mt>();
-    auto delay = std::chrono::milliseconds(10);
+    auto delay = 10ms;
     test_sink->set_delay(delay);
     async_sink::config config;
     config.sinks.push_back(test_sink);
@@ -321,8 +321,8 @@ TEST_CASE("wait_all", "[async]") {
     for (size_t i = 0; i < messages; i++) {
         logger->info("Hello message");
     }
-    REQUIRE_FALSE(as->wait_all(std::chrono::milliseconds(-10)));
-    REQUIRE_FALSE(as->wait_all(std::chrono::milliseconds(0)));
+    REQUIRE_FALSE(as->wait_all(-10ms));
+    REQUIRE_FALSE(as->wait_all(0ms));
     auto start = std::chrono::steady_clock::now();
     REQUIRE_FALSE(as->wait_all(delay));
 
@@ -331,16 +331,16 @@ TEST_CASE("wait_all", "[async]") {
     REQUIRE(elapsed >= delay);
     REQUIRE(elapsed < delay * 3);
     // wait enough time for all messages to be processed
-    REQUIRE(as->wait_all(std::chrono::milliseconds(messages * delay + std::chrono::milliseconds(500))));
-    REQUIRE(as->wait_all(std::chrono::milliseconds(-10)));  // no more messages
-    REQUIRE(as->wait_all(std::chrono::milliseconds(0)));    // no more messages
-    REQUIRE(as->wait_all(std::chrono::milliseconds(10)));   // no more messages
+    REQUIRE(as->wait_all(messages * delay + 500ms));
+    REQUIRE(as->wait_all(-10ms));  // no more messages
+    REQUIRE(as->wait_all(0ms));    // no more messages
+    REQUIRE(as->wait_all(10ms));   // no more messages
 }
 
 // test wait_all without timeout
 TEST_CASE("wait_all2", "[async]") {
     auto test_sink = std::make_shared<test_sink_mt>();
-    auto delay = std::chrono::milliseconds(10);
+    auto delay = 10ms;
     test_sink->set_delay(delay);
     async_sink::config config;
     config.sinks.push_back(test_sink);
