@@ -309,3 +309,49 @@ TEST_CASE("custom_err_handler", "[async]") {
     // lvalue logger so will be destructed here already so all messages were processed
     REQUIRE(error_called);
 }
+
+// test wait_all
+TEST_CASE("wait_all", "[async]") {
+    auto test_sink = std::make_shared<test_sink_mt>();
+    auto delay = std::chrono::milliseconds(10);
+    test_sink->set_delay(delay);
+    async_sink::config config;
+    config.sinks.push_back(test_sink);
+    size_t messages = 10;
+    auto as = std::make_shared<async_sink>(config);
+    auto logger = std::make_shared<spdlog::logger>("async_logger", as);
+    for (size_t i = 0; i < messages; i++) {
+        logger->info("Hello message");
+    }
+    REQUIRE_FALSE(as->wait_all(std::chrono::milliseconds(-10)));
+    REQUIRE_FALSE(as->wait_all(std::chrono::milliseconds(0)));
+    auto start = std::chrono::steady_clock::now();
+    REQUIRE_FALSE(as->wait_all(delay));
+
+    // should have waited approx 10ms before giving up
+    auto elapsed = std::chrono::steady_clock::now() - start;
+    REQUIRE(elapsed >= delay);
+    REQUIRE(elapsed < delay * 3);
+    // wait enough time for all messages to be processed
+    REQUIRE(as->wait_all(std::chrono::milliseconds(messages * delay)));
+    REQUIRE(as->wait_all(std::chrono::milliseconds(-10))); // no more messages
+    REQUIRE(as->wait_all(std::chrono::milliseconds(0)));   // no more messages
+    REQUIRE(as->wait_all(std::chrono::milliseconds(10)));  // no more messages
+}
+
+// test wait_all without timeout
+TEST_CASE("wait_all2", "[async]") {
+    auto test_sink = std::make_shared<test_sink_mt>();
+    auto delay = std::chrono::milliseconds(10);
+    test_sink->set_delay(delay);
+    async_sink::config config;
+    config.sinks.push_back(test_sink);
+    size_t messages = 10;
+    auto as = std::make_shared<async_sink>(config);
+    auto logger = std::make_shared<spdlog::logger>("async_logger", as);
+    for (size_t i = 0; i < messages; i++) {
+        logger->info("Hello message");
+    }
+    as->wait_all();
+    REQUIRE(test_sink->msg_counter() == messages);
+}

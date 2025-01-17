@@ -42,9 +42,46 @@ public:
         err_handler custom_err_handler = nullptr;
     };
 
-    explicit async_sink(const config &async_config);
+    explicit async_sink(config async_config);
+    async_sink(const async_sink &) = delete;
+    async_sink &operator=(const async_sink &) = delete;
+    ~async_sink() override;
 
-    // create an async_sink with one backend sink
+    // sink interface implementation
+    void log(const details::log_msg &msg) override;
+    void set_pattern(const std::string &pattern) override;
+    void set_formatter(std::unique_ptr<formatter> sink_formatter) override;
+    // enqueue flush request to the worker thread and return immediately(default)
+    // if you need to wait for the actual flush to finish, call wait_for_all() after flush()
+    void flush() override;
+
+    // async_sink specific methods
+
+    // wait until all logs were processed up to timeout milliseconds.
+    // returns true if all messages were processed, false if timeout was reached
+    [[nodiscard]] bool wait_all(std::chrono::milliseconds timeout) const;
+
+    // wait until all logs were processed
+    void wait_all() const;
+
+    // return the number of overrun messages (effective only if policy is overrun_oldest)
+    [[nodiscard]] size_t get_overrun_counter() const;
+
+    // reset the overrun counter
+    void reset_overrun_counter() const;
+
+    // return the number of discarded messages (effective only if policy is discard_new)
+    [[nodiscard]] size_t get_discard_counter() const;
+
+    // reset the discard counter
+    void reset_discard_counter() const;
+
+    // return the current async_sink configuration
+    [[nodiscard]] const config &get_config() const;
+
+    // create an async_sink with one backend sink constructed with the given args.
+    // example:
+    // auto async_file = async_sink::with<spdlog::sinks::basic_file_sink_st>("mylog.txt");
     template <typename Sink, typename... SinkArgs>
     static std::shared_ptr<async_sink> with(SinkArgs &&...sink_args) {
         config cfg{};
@@ -52,20 +89,6 @@ public:
         return std::make_shared<async_sink>(cfg);
     }
 
-    ~async_sink() override;
-
-    // sink interface implementation
-    void log(const details::log_msg &msg) override;
-    void flush() override;
-    void set_pattern(const std::string &pattern) override;
-    void set_formatter(std::unique_ptr<formatter> sink_formatter) override;
-
-    // async sink specific methods
-    [[nodiscard]] size_t get_overrun_counter() const;
-    void reset_overrun_counter() const;
-    [[nodiscard]] size_t get_discard_counter() const;
-    void reset_discard_counter() const;
-    [[nodiscard]] const config &get_config() const;
 
 private:
     using async_log_msg = details::async_log_msg;
@@ -80,6 +103,8 @@ private:
     std::unique_ptr<queue_t> q_;
     std::thread worker_thread_;
     details::err_helper err_helper_;
+    std::atomic_size_t flush_requests_ = 0;
+    std::atomic_bool terminate_worker_ = false;
 };
 
 }  // namespace sinks

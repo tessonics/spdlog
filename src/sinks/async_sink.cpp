@@ -3,8 +3,10 @@
 
 #include "spdlog/sinks/async_sink.h"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
+#include <utility>
 
 #include "spdlog/common.h"
 #include "spdlog/details/mpmc_blocking_q.h"
@@ -14,8 +16,8 @@
 namespace spdlog {
 namespace sinks {
 
-async_sink::async_sink(const config &async_config)
-    : config_(async_config) {
+async_sink::async_sink(config async_config)
+    : config_(std::move(async_config)) {
     if (config_.queue_size == 0 || config_.queue_size > max_queue_size) {
         throw spdlog_ex("async_sink: invalid queue size");
     }
@@ -36,13 +38,18 @@ async_sink::~async_sink() {
         q_->enqueue(async_log_msg(async_log_msg::type::terminate));
         worker_thread_.join();
     } catch (...) {
-        printf("Exception in ~async_sink()\n");
+        terminate_worker_ = true; // as last resort, stop the worker thread using terminate_worker_ flag.
+        #ifndef NDEBUG
+            printf("Exception in ~async_sink()\n");
+        #endif
     }
 }
 
 void async_sink::log(const details::log_msg &msg) { send_message_(async_log_msg::type::log, msg); }
 
-void async_sink::flush() { send_message_(async_log_msg::type::flush, details::log_msg()); }
+void async_sink::flush() {
+    send_message_(async_log_msg::type::flush, details::log_msg());
+}
 
 void async_sink::set_pattern(const std::string &pattern) { set_formatter(std::make_unique<pattern_formatter>(pattern)); }
 
@@ -56,6 +63,24 @@ void async_sink::set_formatter(std::unique_ptr<formatter> formatter) {
         }
         (*it)->set_formatter(formatter->clone());
     }
+}
+
+bool async_sink::wait_all(const std::chrono::milliseconds timeout) const {
+    using std::chrono::steady_clock;
+    constexpr std::chrono::milliseconds sleep_duration(5);
+    const auto start_time = steady_clock::now();
+    while (q_->size() > 0) {
+        auto elapsed = steady_clock::now() - start_time;
+        if (elapsed > timeout) {
+            return false;
+        }
+        std::this_thread::sleep_for(std::min(sleep_duration, timeout));
+    }
+    return true;
+}
+
+void async_sink::wait_all() const {
+    while (!wait_all(std::chrono::milliseconds(10))) { /* empty */ }
 }
 
 size_t async_sink::get_overrun_counter() const { return q_->overrun_counter(); }
@@ -88,7 +113,7 @@ void async_sink::send_message_(async_log_msg::type msg_type, const details::log_
 
 void async_sink::backend_loop_() {
     details::async_log_msg incoming_msg;
-    for (;;) {
+    while (!terminate_worker_) {
         q_->dequeue(incoming_msg);
         switch (incoming_msg.message_type()) {
             case async_log_msg::type::log:
@@ -105,7 +130,7 @@ void async_sink::backend_loop_() {
     }
 }
 
-void async_sink::backend_log_(const details::log_msg &msg)  {
+void async_sink::backend_log_(const details::log_msg &msg) {
     for (const auto &sink : config_.sinks) {
         if (sink->should_log(msg.log_level)) {
             try {
