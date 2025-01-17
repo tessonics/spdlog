@@ -7,8 +7,8 @@
 
 #include "includes.h"
 #include "spdlog/details/os.h"
-#include "spdlog/sinks/ostream_sink.h"
 #include "spdlog/sinks/async_sink.h"
+#include "spdlog/sinks/ostream_sink.h"
 #include "test_sink.h"
 
 template <class T>
@@ -79,18 +79,27 @@ TEST_CASE("clone-logger", "[clone]") {
     auto test_sink = std::make_shared<test_sink_mt>();
     auto logger = std::make_shared<spdlog::logger>("orig", test_sink);
     logger->set_pattern("%v");
+    bool error_handled = false;
+    logger->set_error_handler([&error_handled](const std::string&) { error_handled = true; });
     auto cloned = logger->clone("clone");
 
     REQUIRE(cloned->name() == "clone");
     REQUIRE(logger->sinks() == cloned->sinks());
     REQUIRE(logger->log_level() == cloned->log_level());
     REQUIRE(logger->flush_level() == cloned->flush_level());
+
     logger->info("Some message 1");
     cloned->info("Some message 2");
 
     REQUIRE(test_sink->lines().size() == 2);
     REQUIRE(test_sink->lines()[0] == "Some message 1");
     REQUIRE(test_sink->lines()[1] == "Some message 2");
+
+    // check that cloned custom error handler was indeed cloned
+    test_sink->set_exception(std::runtime_error("Some error"));
+    REQUIRE(error_handled == false);
+    cloned->error("Some error");
+    REQUIRE(error_handled == true);
 }
 
 TEST_CASE("clone async", "[clone]") {
