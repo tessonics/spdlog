@@ -14,12 +14,12 @@ namespace details {
 namespace fmt_helper {
 
 inline void append_string_view(spdlog::string_view_t view, memory_buf_t &dest) {
-    auto *buf_ptr = view.data();
+    const auto *buf_ptr = view.data();
     dest.append(buf_ptr, buf_ptr + view.size());
 }
 
 template <typename T>
-inline void append_int(T n, memory_buf_t &dest) {
+void append_int(T n, memory_buf_t &dest) {
     fmt::format_int i(n);
     dest.append(i.data(), i.data() + i.size());
 }
@@ -36,14 +36,14 @@ constexpr unsigned int count_digits_fallback(T n) {
         if (n < 100) return count + 1;
         if (n < 1000) return count + 2;
         if (n < 10000) return count + 3;
-        n /= 10000u;
+        n /= 10000U;
         count += 4;
     }
 }
 
 template <typename T>
 inline unsigned int count_digits(T n) {
-    using count_type = typename std::conditional<(sizeof(T) > sizeof(uint32_t)), uint64_t, uint32_t>::type;
+    using count_type = std::conditional_t<(sizeof(T) > sizeof(uint32_t)), uint64_t, uint32_t>;
 
     return static_cast<unsigned int>(fmt::
 // fmt 7.0.0 renamed the internal namespace to detail.
@@ -59,8 +59,8 @@ inline unsigned int count_digits(T n) {
 inline void pad2(int n, memory_buf_t &dest) {
     if (n >= 0 && n < 100)  // 0-99
     {
-        dest.push_back(static_cast<char>('0' + n / 10));
-        dest.push_back(static_cast<char>('0' + n % 10));
+        dest.push_back(static_cast<char>('0' + (n / 10)));
+        dest.push_back(static_cast<char>('0' + (n % 10)));
     } else  // unlikely, but just in case, let fmt deal with it
     {
         fmt_lib::format_to(std::back_inserter(dest), SPDLOG_FMT_STRING("{:02}"), n);
@@ -69,18 +69,18 @@ inline void pad2(int n, memory_buf_t &dest) {
 
 template <typename T>
 inline void pad_uint(T n, unsigned int width, memory_buf_t &dest) {
-    static_assert(std::is_unsigned<T>::value, "pad_uint must get unsigned T");
-    for (auto digits = count_digits(n); digits < width; digits++) {
+    static_assert(std::is_unsigned_v<T>, "pad_uint must get unsigned T");
+    for (auto digits = count_digits(n); digits < width; ++digits) {
         dest.push_back('0');
     }
     append_int(n, dest);
 }
 
 template <typename T>
-inline void pad3(T n, memory_buf_t &dest) {
-    static_assert(std::is_unsigned<T>::value, "pad3 must get unsigned T");
+void pad3(T n, memory_buf_t &dest) {
+    static_assert(std::is_unsigned_v<T>, "pad3 must get unsigned T");
     if (n < 1000) {
-        dest.push_back(static_cast<char>(n / 100 + '0'));
+        dest.push_back(static_cast<char>((n / 100) + '0'));
         n = n % 100;
         dest.push_back(static_cast<char>((n / 10) + '0'));
         dest.push_back(static_cast<char>((n % 10) + '0'));
@@ -90,12 +90,12 @@ inline void pad3(T n, memory_buf_t &dest) {
 }
 
 template <typename T>
-inline void pad6(T n, memory_buf_t &dest) {
+void pad6(T n, memory_buf_t &dest) {
     pad_uint(n, 6, dest);
 }
 
 template <typename T>
-inline void pad9(T n, memory_buf_t &dest) {
+void pad9(T n, memory_buf_t &dest) {
     pad_uint(n, 9, dest);
 }
 
@@ -103,7 +103,7 @@ inline void pad9(T n, memory_buf_t &dest) {
 // e.g.
 // fraction<std::milliseconds>(tp) -> will return the millis part of the second
 template <typename ToDuration>
-inline ToDuration time_fraction(log_clock::time_point tp) {
+ToDuration time_fraction(log_clock::time_point tp) {
     using std::chrono::duration_cast;
     using std::chrono::seconds;
     auto duration = tp.time_since_epoch();
