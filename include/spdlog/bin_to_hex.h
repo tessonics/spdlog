@@ -51,7 +51,7 @@ public:
     // do not use begin() and end() to avoid collision with fmt/ranges
     It get_begin() const { return begin_; }
     It get_end() const { return end_; }
-    size_t size_per_line() const { return size_per_line_; }
+    [[nodiscard]] size_t size_per_line() const { return size_per_line_; }
 
 private:
     It begin_, end_;
@@ -90,7 +90,7 @@ inline details::dump_info<It> to_hex(const It range_begin, const It range_end, s
 
 template <typename T>
 struct fmt::formatter<spdlog::details::dump_info<T>, char> {
-    const char delimiter = ' ';
+    char delimiter = ' ';
     bool put_newlines = true;
     bool put_delimiters = true;
     bool use_uppercase = false;
@@ -138,14 +138,14 @@ struct fmt::formatter<spdlog::details::dump_info<T>, char> {
         auto inserter = ctx.out();
         int size_per_line = static_cast<int>(the_range.size_per_line());
         auto start_of_line = the_range.get_begin();
-        for (auto i = the_range.get_begin(); i != the_range.get_end(); i++) {
+        for (auto i = the_range.get_begin(); i != the_range.get_end(); ++i) {
             auto ch = static_cast<unsigned char>(*i);
 
             if (put_newlines && (i == the_range.get_begin() || i - start_of_line >= size_per_line)) {
                 if (show_ascii && i != the_range.get_begin()) {
                     *inserter++ = delimiter;
                     *inserter++ = delimiter;
-                    for (auto j = start_of_line; j < i; j++) {
+                    for (auto j = start_of_line; j < i; ++j) {
                         auto pc = static_cast<unsigned char>(*j);
                         *inserter++ = std::isprint(pc) ? static_cast<char>(*j) : '.';
                     }
@@ -181,7 +181,7 @@ struct fmt::formatter<spdlog::details::dump_info<T>, char> {
             }
             *inserter++ = delimiter;
             *inserter++ = delimiter;
-            for (auto j = start_of_line; j != the_range.get_end(); j++) {
+            for (auto j = start_of_line; j != the_range.get_end(); ++j) {
                 auto pc = static_cast<unsigned char>(*j);
                 *inserter++ = std::isprint(pc) ? static_cast<char>(*j) : '.';
             }
