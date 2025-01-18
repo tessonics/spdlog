@@ -66,16 +66,19 @@ int main(int argc, char *argv[]) {
         if (argc > 2) threads = atoi(argv[2]);
         if (argc > 3) {
             queue_size = atoi(argv[3]);
-            if (queue_size > 500000) {
-                spdlog::error("Max queue size allowed: 500,000");
-                exit(1);
-            }
         }
 
         if (argc > 4) iters = atoi(argv[4]);
         // validate all argc values
-        if (howmany < 1 || threads < 1 || queue_size < 1 || iters < 1) {
+        if (howmany < 1 || threads < 1 || queue_size < 1 ||  iters < 1) {
             spdlog::error("Invalid input values");
+            exit(1);
+        }
+
+        constexpr int max_q_size = sinks::async_sink::max_queue_size;
+        if(queue_size > max_q_size)
+        {
+            spdlog::error("Queue size too large. Max queue size is {:L}", max_q_size);
             exit(1);
         }
 
