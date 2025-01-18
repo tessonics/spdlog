@@ -21,7 +21,7 @@ struct custom_ex {};
 using namespace spdlog::sinks;
 TEST_CASE("default_error_handler", "[errors]") {
     prepare_logdir();
-    auto logger = spdlog::create<basic_file_sink_mt>("test-error", log_filename);
+    auto logger = spdlog::create<basic_file_sink_mt>("test-bad-format", log_filename);
     logger->set_pattern("%v");
     logger->info(SPDLOG_FMT_RUNTIME("Test message {} {}"), 1);
     logger->info("Test message {}", 2);
@@ -42,8 +42,36 @@ TEST_CASE("custom_error_handler", "[errors]") {
     require_message_count(log_filename, 2);
 }
 
-TEST_CASE("default_error_handler2", "[errors]") {
-    auto logger = std::make_shared<spdlog::logger>("test-failing-sink", std::make_shared<failing_sink>());
+TEST_CASE("throwing_sink", "[errors]") {
+    auto logger = std::make_shared<spdlog::logger>("test-throwing-sink", std::make_shared<failing_sink>());
+    REQUIRE_NOTHROW(logger->info("Some message"));
+}
+
+TEST_CASE("throwing_flush", "[errors]") {
+    auto logger = spdlog::create<failing_sink>("test-throwing-sink");
+    REQUIRE_NOTHROW(logger->flush());
+}
+
+TEST_CASE("throwing_error_handler", "[errors]") {
+    auto logger = std::make_shared<spdlog::logger>("test-throwing-error-handler", std::make_shared<failing_sink>());
+    logger->set_error_handler([=](const std::string &msg) {
+        REQUIRE(msg == log_err_msg);
+        throw std::runtime_error("test throw");
+    });
+    REQUIRE_NOTHROW(logger->info("Some message"));
+}
+
+TEST_CASE("throwing_flush_error_handler", "[errors]") {
+    auto logger = spdlog::create<failing_sink>("test-throwing-error-handler");
+    logger->set_error_handler([=](const std::string &msg) {
+        REQUIRE(msg == flush_err_msg);
+        throw std::runtime_error("test throw");
+    });
+    REQUIRE_NOTHROW(logger->flush());
+}
+
+TEST_CASE("unknown_ex_from_err_handler", "[errors]") {
+    auto logger = std::make_shared<spdlog::logger>("test-throwing-error-handler", std::make_shared<failing_sink>());
     logger->set_error_handler([=](const std::string &msg) {
         REQUIRE(msg == log_err_msg);
         throw custom_ex();
@@ -51,8 +79,8 @@ TEST_CASE("default_error_handler2", "[errors]") {
     REQUIRE_NOTHROW(logger->info("Some message"));
 }
 
-TEST_CASE("flush_error_handler", "[errors]") {
-    auto logger = spdlog::create<failing_sink>("test-failing-sink");
+TEST_CASE("unknown_ex_from_flush_err_handler", "[errors]") {
+    auto logger = spdlog::create<failing_sink>("test-throwing-error-handler");
     logger->set_error_handler([=](const std::string &msg) {
         REQUIRE(msg == flush_err_msg);
         throw custom_ex();

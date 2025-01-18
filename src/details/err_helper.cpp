@@ -46,10 +46,10 @@ void err_helper::handle_ex(const std::string &origin, const source_loc &loc, con
         }
         std::fputs(msg.c_str(), stderr);
     } catch (const std::exception &handler_ex) {
-        std::fprintf(stderr, "[*** LOG ERROR ***] [%s] caught exception during error handler: %s\n", origin.c_str(),
+        std::fprintf(stderr, "[*** LOG ERROR ***] [%s] exception during %s handler: %s\n", origin.c_str(), custom_err_handler_ ? "custom" : "default",
                      handler_ex.what());
     } catch (...) {  // catch all exceptions
-        std::fprintf(stderr, "[*** LOG ERROR ***] [%s] caught unknown exception during error handler\n", origin.c_str());
+        std::fprintf(stderr, "[*** LOG ERROR ***] [%s] unknown exception during %s handler\n", origin.c_str(), custom_err_handler_ ? "custom" : "default");
     }
 }
 
