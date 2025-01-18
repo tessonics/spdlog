@@ -12,10 +12,7 @@ namespace spdlog {
 namespace sinks {
 
 template <typename Mutex>
-ansicolor_sink<Mutex>::ansicolor_sink(FILE *target_file, color_mode mode)
-    : target_file_(target_file)
-
-{
+ansicolor_sink<Mutex>::ansicolor_sink(FILE *target_file, color_mode mode) : target_file_(target_file) {
     set_color_mode(mode);
     colors_.at(level_to_number(level::trace)) = to_string_(white);
     colors_.at(level_to_number(level::debug)) = to_string_(cyan);
@@ -34,11 +31,13 @@ void ansicolor_sink<Mutex>::set_color(level color_level, string_view_t color) {
 
 template <typename Mutex>
 bool ansicolor_sink<Mutex>::should_color() const {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
     return should_do_colors_;
 }
 
 template <typename Mutex>
 void ansicolor_sink<Mutex>::set_color_mode(color_mode mode) {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
     switch (mode) {
         case color_mode::always:
             should_do_colors_ = true;
@@ -58,7 +57,6 @@ template <typename Mutex>
 void ansicolor_sink<Mutex>::sink_it_(const details::log_msg &msg) {
     // Wrap the originally formatted message in color codes.
     // If color is not supported in the terminal, log as is instead.
-
     msg.color_range_start = 0;
     msg.color_range_end = 0;
     memory_buf_t formatted;
