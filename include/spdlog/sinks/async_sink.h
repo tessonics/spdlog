@@ -55,13 +55,12 @@ public:
     void set_pattern(const std::string &pattern) override;
     void set_formatter(std::unique_ptr<formatter> sink_formatter) override;
     // enqueue flush request to the worker thread and return immediately(default)
-    // if you need to wait for the actual flush to finish, call wait_for_all() after flush()
+    // if you need to wait for the actual flush to finish, call wait_all() after flush() or destruct the sink
     void flush() override;
 
-    // async_sink specific methods
+    // non sink interface methods
 
-    // wait until all logs were processed up to timeout milliseconds.
-    // returns true if all messages were processed, false if timeout was reached
+    // wait until all logs were processed up to timeout millis and return false if timeout was reached
     [[nodiscard]] bool wait_all(std::chrono::milliseconds timeout) const;
 
     // wait until all logs were processed
