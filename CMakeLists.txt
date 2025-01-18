@@ -242,9 +242,6 @@ if (BUILD_SHARED_LIBS)
     endif ()
     add_library(spdlog SHARED ${VERSION_RC})
     target_compile_definitions(spdlog PUBLIC SPDLOG_SHARED_LIB)
-    set_target_properties(spdlog PROPERTIES
-            CXX_VISIBILITY_PRESET hidden
-            VISIBILITY_INLINES_HIDDEN ON)
 
     if (MSVC)
         # disable dlls related warnings on msvc
@@ -254,6 +251,9 @@ if (BUILD_SHARED_LIBS)
 else ()
     add_library(spdlog STATIC)
 endif ()
+
+set_target_properties(spdlog PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+
 add_library(spdlog::spdlog ALIAS spdlog)
 target_sources(spdlog PRIVATE ${SPDLOG_SRCS})
 target_sources(

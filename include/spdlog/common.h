@@ -29,7 +29,11 @@
         #define SPDLOG_API __attribute__((visibility("default")))
     #endif
 #else  // !defined(SPDLOG_SHARED_LIB)
-    #define SPDLOG_API
+    #if defined(_WIN32)
+        #define SPDLOG_API
+    #else
+        #define SPDLOG_API __attribute__((visibility("default")))
+    #endif
 #endif
 
 #define SPDLOG_FMT_RUNTIME(format_string) fmt::runtime(format_string)
