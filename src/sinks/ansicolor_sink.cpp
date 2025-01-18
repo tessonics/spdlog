@@ -13,7 +13,7 @@ namespace sinks {
 
 template <typename Mutex>
 ansicolor_sink<Mutex>::ansicolor_sink(FILE *target_file, color_mode mode) : target_file_(target_file) {
-    set_color_mode(mode);
+    set_color_mode_(mode);
     colors_.at(level_to_number(level::trace)) = to_string_(white);
     colors_.at(level_to_number(level::debug)) = to_string_(cyan);
     colors_.at(level_to_number(level::info)) = to_string_(green);
@@ -38,21 +38,26 @@ bool ansicolor_sink<Mutex>::should_color() const {
 template <typename Mutex>
 void ansicolor_sink<Mutex>::set_color_mode(color_mode mode) {
     std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
+    set_color_mode_(mode);
+}
+
+template <typename Mutex>
+void ansicolor_sink<Mutex>::set_color_mode_(color_mode mode) {
+    std::lock_guard<Mutex> lock(base_sink<Mutex>::mutex_);
     switch (mode) {
         case color_mode::always:
             should_do_colors_ = true;
-            return;
+        return;
         case color_mode::automatic:
             should_do_colors_ = details::os::in_terminal(target_file_) && details::os::is_color_terminal();
-            return;
+        return;
         case color_mode::never:
             should_do_colors_ = false;
-            return;
+        return;
         default:
             should_do_colors_ = false;
     }
 }
-
 template <typename Mutex>
 void ansicolor_sink<Mutex>::sink_it_(const details::log_msg &msg) {
     // Wrap the originally formatted message in color codes.
