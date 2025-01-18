@@ -18,23 +18,24 @@
 #include "fmt/base.h"
 #include "fmt/xchar.h"
 
-#if defined(SPDLOG_SHARED_LIB)
-    #if defined(_WIN32)
+#if defined(_WIN32)
+    #ifdef SPDLOG_SHARED_LIB
         #ifdef spdlog_EXPORTS
             #define SPDLOG_API __declspec(dllexport)
-        #else  // !spdlog_EXPORTS
+        #else
             #define SPDLOG_API __declspec(dllimport)
         #endif
-    #else  // !defined(_WIN32)
-        #define SPDLOG_API __attribute__((visibility("default")))
-    #endif
-#else  // !defined(SPDLOG_SHARED_LIB)
-    #if defined(_WIN32)
-        #define SPDLOG_API
     #else
-        #define SPDLOG_API __attribute__((visibility("default")))
+        define SPDLOG_API
     #endif
+#else
+    // in gcc/clang, always set visibility to "default"
+#if defined(__GNUC__) || defined(__clang__)
+    #define SPDLOG_API __attribute__((visibility("default")))
+#else
+    #define SPDLOG_API
 #endif
+#endif // defined(_WIN32)
 
 #define SPDLOG_FMT_RUNTIME(format_string) fmt::runtime(format_string)
 #define SPDLOG_FMT_STRING(format_string) FMT_STRING(format_string)
