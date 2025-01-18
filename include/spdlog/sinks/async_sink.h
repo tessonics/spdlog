@@ -31,7 +31,8 @@ public:
         discard_new      // Discard the log message if the queue is full
     };
 
-    enum { default_queue_size = 8192, max_queue_size = 250'000};
+    static constexpr size_t default_queue_size = 8192;
+    static constexpr size_t max_queue_size = 250'000;
 
     struct config {
         size_t queue_size = default_queue_size;
