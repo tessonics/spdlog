@@ -7,7 +7,6 @@
 #include <utility>
 
 // null, no cost dummy "mutex" and dummy "atomic" log level
-
 namespace spdlog {
 namespace details {
 struct null_mutex {

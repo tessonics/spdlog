@@ -70,14 +70,16 @@ public:
     static constexpr std::string_view bold_on_red = "\033[1m\033[41m";
 
 private:
-    void sink_it_(const details::log_msg &msg) override;
-    void flush_() override;
     FILE *target_file_;
     bool should_do_colors_;
     std::array<std::string, levels_count> colors_;
-    void print_ccode_(const string_view_t color_code);
-    void print_range_(const memory_buf_t &formatted, size_t start, size_t end);
-    static std::string to_string_(const string_view_t sv);
+
+    void sink_it_(const details::log_msg &msg) override;
+    void flush_() override;
+    void set_color_mode_(color_mode mode);
+    void print_ccode_(string_view_t color_code) const;
+    void print_range_(const memory_buf_t &formatted, size_t start, size_t end) const;
+    static std::string to_string_(string_view_t sv);
 };
 
 template <typename Mutex>
