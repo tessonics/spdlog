@@ -47,20 +47,15 @@ public:
     }
 
     void enqueue_if_have_room(T &&item) {
-        bool pushed = false;
         {
-            std::unique_lock<std::mutex> lock(queue_mutex_);
-            if (!q_.full()) {
-                q_.push_back(std::move(item));
-                pushed = true;
+            std::unique_lock lock(queue_mutex_);
+            if (q_.full()) {
+                ++discard_counter_;
+                return;
             }
+            q_.push_back(std::move(item));
         }
-
-        if (pushed) {
-            push_cv_.notify_one();
-        } else {
-            ++discard_counter_;
-        }
+        push_cv_.notify_one();
     }
 
     // dequeue with a timeout.
