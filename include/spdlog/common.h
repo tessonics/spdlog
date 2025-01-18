@@ -18,24 +18,21 @@
 #include "fmt/base.h"
 #include "fmt/xchar.h"
 
-#if defined(_WIN32)
-    #ifdef SPDLOG_SHARED_LIB
-        #ifdef spdlog_EXPORTS
-            #define SPDLOG_API __declspec(dllexport)
-        #else
-            #define SPDLOG_API __declspec(dllimport)
-        #endif
+// Define SPDLOG_API according to current build settings
+#ifndef SPDLOG_SHARED_LIB
+    #define SPDLOG_API
+#elif defined(_WIN32)
+    #ifdef spdlog_EXPORTS
+        #define SPDLOG_API __declspec(dllexport) // Export symbols when building the library
     #else
-        define SPDLOG_API
+        #define SPDLOG_API __declspec(dllimport) // Import symbols when using the library
     #endif
-#else
-    // in gcc/clang, always set visibility to "default"
-#if defined(__GNUC__) || defined(__clang__)
-    #define SPDLOG_API __attribute__((visibility("default")))
+#elif (defined(__GNUC__) || defined(__clang__))
+    #define SPDLOG_API __attribute__((visibility("default"))) // Export symbols for shared libraries
 #else
     #define SPDLOG_API
 #endif
-#endif // defined(_WIN32)
+// End of SPDLOG_API definition
 
 #define SPDLOG_FMT_RUNTIME(format_string) fmt::runtime(format_string)
 #define SPDLOG_FMT_STRING(format_string) FMT_STRING(format_string)
