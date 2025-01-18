@@ -35,8 +35,10 @@ void err_helper::handle_ex(const std::string &origin, const source_loc &loc, con
         }
         last_report_time_ = now;
         const auto tm_time = os::localtime();
-        char date_buf[32];
-        std::strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", &tm_time);
+        char date_buf[64];
+        if (std::strftime(date_buf, sizeof(date_buf), "%Y-%m-%d %H:%M:%S", &tm_time) == 0) {
+            std::snprintf(date_buf, sizeof(date_buf), "unknown time");
+        }
         std::string msg;
         if (loc.empty()) {
             msg = fmt_lib::format("[*** LOG ERROR ***] [{}] [{}] {}\n", date_buf, origin, ex.what());
