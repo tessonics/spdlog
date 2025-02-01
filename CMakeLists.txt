@@ -63,7 +63,6 @@ option(SPDLOG_NO_THREAD_ID "prevent spdlog from querying the thread id on each l
 option(SPDLOG_DISABLE_GLOBAL_LOGGER "Disable global logger creation" OFF)
 option(SPDLOG_NO_TLS "Disable thread local storage" OFF)
 option(SPDLOG_TIDY "run clang-tidy" OFF)
-
 if (SPDLOG_TIDY)
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
