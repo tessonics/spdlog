@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
     }
     using spdlog::sinks::async_sink;
     async_sink::config config;
-    config.queue_size = 3 * 1024 * 1024;
-    ;
+    config.queue_size = async_sink::default_queue_size;;
+
     config.sinks.push_back(std::make_shared<null_sink_st>());
     config.policy = async_sink::overflow_policy::overrun_oldest;
     auto async_logger = std::make_shared<spdlog::logger>("async_logger", std::make_shared<async_sink>(config));

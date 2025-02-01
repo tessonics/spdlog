@@ -21,8 +21,7 @@
 
 using namespace std;
 using namespace std::chrono;
-using namespace spdlog;
-using namespace spdlog::sinks;
+using spdlog::sinks::async_sink;
 
 void bench_mt(int howmany, std::shared_ptr<spdlog::logger> log, int thread_count);
 
@@ -50,8 +49,8 @@ using namespace spdlog::sinks;
 int main(int argc, char *argv[]) {
     // setlocale to show thousands separators
     std::locale::global(std::locale("en_US.UTF-8"));
-    int howmany = 1000000;
-    int queue_size = std::min(howmany + 2, 8192);
+    int howmany = 1'000'000;
+    int queue_size = async_sink::default_queue_size;
     int threads = 10;
     int iters = 3;
 
@@ -75,14 +74,14 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        constexpr int max_q_size = sinks::async_sink::max_queue_size;
+        constexpr int max_q_size = async_sink::max_queue_size;
         if(queue_size > max_q_size)
         {
             spdlog::error("Queue size too large. Max queue size is {:L}", max_q_size);
             exit(1);
         }
 
-        auto slot_size = sizeof(details::async_log_msg);
+        auto slot_size = sizeof(spdlog::details::async_log_msg);
         spdlog::info("-------------------------------------------------");
         spdlog::info("Messages     : {:L}", howmany);
         spdlog::info("Threads      : {:L}", threads);
@@ -102,8 +101,8 @@ int main(int argc, char *argv[]) {
                 auto cfg = async_sink::config();
                 cfg.queue_size = queue_size;
                 cfg.sinks.push_back(std::move(file_sink));
-                auto async_sink = std::make_shared<sinks::async_sink>(cfg);
-                auto logger = std::make_shared<spdlog::logger>("async_logger", std::move(async_sink));
+                auto sink = std::make_shared<async_sink>(cfg);
+                auto logger = std::make_shared<spdlog::logger>("async_logger", std::move(sink));
                 bench_mt(howmany, std::move(logger), threads);
             }
             // verify_file(filename, howmany); // in separate scope to ensure logger is destroyed and all logs were written
@@ -120,8 +119,8 @@ int main(int argc, char *argv[]) {
             cfg.queue_size = queue_size;
             auto file_sink = std::make_shared<basic_file_sink_mt>(filename, true);
             cfg.sinks.push_back(std::move(file_sink));
-            auto async_sink = std::make_shared<sinks::async_sink>(cfg);
-            auto logger = std::make_shared<spdlog::logger>("async_logger", std::move(async_sink));
+            auto sink = std::make_shared<async_sink>(cfg);
+            auto logger = std::make_shared<spdlog::logger>("async_logger", std::move(sink));
             bench_mt(howmany, std::move(logger), threads);
         }
         spdlog::shutdown();
